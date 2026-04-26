@@ -1,0 +1,972 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>AgentHub - AI 工具管理中心</title>
+    <script src="https://unpkg.com/vue@3/dist/vue.global.prod.js"></script>
+    <script src="https://unpkg.com/axios/dist/axios.min.js"></script>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+        * { font-family: 'Inter', system-ui, sans-serif; }
+        
+        body {
+            background: linear-gradient(135deg, #0f0f23 0%, #1a1a2e 50%, #16213e 100%);
+            min-height: 100vh;
+        }
+        
+        .glass {
+            background: rgba(255, 255, 255, 0.05);
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+        }
+        
+        .tool-card {
+            background: linear-gradient(145deg, rgba(255,255,255,0.08) 0%, rgba(255,255,255,0.02) 100%);
+            transition: all 0.3s ease;
+        }
+        
+        .tool-card:hover {
+            transform: translateY(-4px);
+            box-shadow: 0 20px 40px rgba(0,0,0,0.3);
+            border-color: rgba(99, 102, 241, 0.5);
+        }
+        
+        .status-dot {
+            animation: pulse 2s infinite;
+        }
+        
+        @keyframes pulse {
+            0%, 100% { opacity: 1; }
+            50% { opacity: 0.5; }
+        }
+        
+        .skill-tag {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        }
+        
+        .public-tag {
+            background: linear-gradient(135deg, #11998e 0%, #38ef7d 100%);
+        }
+        
+        .scrollbar-thin::-webkit-scrollbar {
+            width: 6px;
+        }
+        
+        .scrollbar-thin::-webkit-scrollbar-track {
+            background: rgba(255,255,255,0.05);
+            border-radius: 3px;
+        }
+        
+        .scrollbar-thin::-webkit-scrollbar-thumb {
+            background: rgba(255,255,255,0.2);
+            border-radius: 3px;
+        }
+        
+        .gradient-text {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+        
+        .modal-overlay {
+            background: rgba(0, 0, 0, 0.7);
+            backdrop-filter: blur(4px);
+        }
+        
+        .tab-active {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        }
+        
+        .folder-icon {
+            background: linear-gradient(135deg, #4facfe 0%, #00f2fe 100%);
+        }
+    </style>
+</head>
+<body class="text-white">
+    <div id="app">
+        <!-- Header -->
+        <header class="glass sticky top-0 z-50 px-6 py-4">
+            <div class="max-w-7xl mx-auto flex items-center justify-between">
+                <div class="flex items-center gap-4">
+                    <div class="w-10 h-10 rounded-xl bg-gradient-to-br from-indigo-500 to-purple-600 flex items-center justify-center">
+                        <span class="text-xl">🤖</span>
+                    </div>
+                    <div>
+                        <h1 class="text-xl font-bold gradient-text">AgentHub</h1>
+                        <p class="text-xs text-gray-400">AI 工具管理中心 · 默认配置: C:\Users\Chatxavier\.agenthub</p>
+                    </div>
+                </div>
+                <div class="flex items-center gap-4">
+                    <button @click="refreshAll" class="px-4 py-2 glass rounded-lg hover:bg-white/10 transition flex items-center gap-2">
+                        <span>🔄</span>
+                        <span class="hidden sm:inline">刷新检测</span>
+                    </button>
+                    <div class="text-right">
+                        <div class="text-sm font-medium">{{ detectedCount }} / {{ tools.length }} 工具已安装</div>
+                        <div class="text-xs text-gray-400">{{ totalSkills }} 个 Skills</div>
+                    </div>
+                </div>
+            </div>
+        </header>
+
+        <!-- Main Content -->
+        <main class="max-w-7xl mx-auto px-6 py-8">
+            
+            <!-- Quick Stats -->
+            <div class="grid grid-cols-2 md:grid-cols-5 gap-4 mb-8">
+                <div class="glass rounded-2xl p-4">
+                    <div class="text-3xl font-bold gradient-text">{{ detectedCount }}</div>
+                    <div class="text-sm text-gray-400">已安装工具</div>
+                </div>
+                <div class="glass rounded-2xl p-4">
+                    <div class="text-3xl font-bold text-green-400">{{ totalSkills }}</div>
+                    <div class="text-sm text-gray-400">本地 Skills</div>
+                </div>
+                <div class="glass rounded-2xl p-4">
+                    <div class="text-3xl font-bold text-blue-400">{{ publicSkillsCount }}</div>
+                    <div class="text-sm text-gray-400">公共 Skills</div>
+                </div>
+                <div class="glass rounded-2xl p-4">
+                    <div class="text-3xl font-bold text-yellow-400">{{ totalAgents }}</div>
+                    <div class="text-sm text-gray-400">Agents 配置</div>
+                </div>
+                <div class="glass rounded-2xl p-4">
+                    <div class="text-3xl font-bold text-purple-400">{{ publicResources.length }}</div>
+                    <div class="text-sm text-gray-400">公共资源</div>
+                </div>
+            </div>
+
+            <!-- Main Navigation Tabs -->
+            <div class="mb-6 flex items-center gap-2">
+                <button 
+                    v-for="tab in ['local', 'public', 'config']" 
+                    :key="tab"
+                    @click="mainTab = tab"
+                    :class="mainTab === tab ? 'tab-active text-white' : 'glass hover:bg-white/10 text-gray-300'"
+                    class="px-5 py-2 rounded-lg text-sm font-medium transition flex items-center gap-2"
+                >
+                    <span v-if="tab === 'local'">💻</span>
+                    <span v-else-if="tab === 'public'">🌐</span>
+                    <span v-else>⚙️</span>
+                    {{ tab === 'local' ? '本地工具' : tab === 'public' ? '公共资源库' : 'AgentHub 配置' }}
+                </button>
+            </div>
+
+            <!-- ========== 本地工具 ========== -->
+            <div v-if="mainTab === 'local'">
+                <!-- Tools Filter -->
+                <div class="mb-6 flex items-center justify-between">
+                    <h2 class="text-lg font-semibold">🎯 AI 工具列表</h2>
+                    <div class="flex gap-2">
+                        <button 
+                            v-for="t in ['all', 'installed', 'missing']" 
+                            :key="t"
+                            @click="filter = t"
+                            :class="filter === t ? 'bg-indigo-600' : 'glass hover:bg-white/10'"
+                            class="px-3 py-1 rounded-lg text-sm transition"
+                        >
+                            {{ t === 'all' ? '全部' : t === 'installed' ? '已安装' : '未安装' }}
+                        </button>
+                    </div>
+                </div>
+
+                <div class="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
+                    <div 
+                        v-for="tool in filteredTools" 
+                        :key="tool.id"
+                        class="tool-card glass rounded-2xl overflow-hidden"
+                    >
+                        <!-- Tool Header -->
+                        <div class="p-5 border-b border-white/10">
+                            <div class="flex items-start justify-between mb-3">
+                                <div class="flex items-center gap-3">
+                                    <div 
+                                        class="w-12 h-12 rounded-xl flex items-center justify-center text-2xl"
+                                        :style="{ background: tool.color }"
+                                    >
+                                        {{ tool.icon }}
+                                    </div>
+                                    <div>
+                                        <h3 class="font-semibold">{{ tool.name }}</h3>
+                                        <p class="text-xs text-gray-400">{{ tool.configPath }}</p>
+                                    </div>
+                                </div>
+                                <div 
+                                    class="status-dot w-3 h-3 rounded-full"
+                                    :class="tool.detected ? 'bg-green-400' : 'bg-red-400'"
+                                ></div>
+                            </div>
+                            <p class="text-sm text-gray-300">{{ tool.description }}</p>
+                        </div>
+
+                        <!-- Detection Info -->
+                        <div class="px-5 py-3 bg-black/20">
+                            <div class="flex items-center justify-between text-xs">
+                                <span class="text-gray-400">检测状态</span>
+                                <span :class="tool.detected ? 'text-green-400' : 'text-red-400'">
+                                    {{ tool.detected ? '✅ 已安装' : '❌ 未安装' }}
+                                </span>
+                            </div>
+                            <div v-if="tool.detected" class="flex items-center justify-between text-xs mt-1">
+                                <span class="text-gray-400">Skills</span>
+                                <span class="text-indigo-400">{{ tool.skills.length }} 个</span>
+                            </div>
+                        </div>
+
+                        <!-- Skills Preview -->
+                        <div v-if="tool.detected && tool.skills.length > 0" class="px-5 py-3">
+                            <div class="text-xs text-gray-400 mb-2">Skills ({{ Math.min(tool.skills.length, 3) }}/{{ tool.skills.length }})</div>
+                            <div class="flex flex-wrap gap-1">
+                                <span 
+                                    v-for="skill in tool.skills.slice(0, 3)" 
+                                    :key="skill.name || skill"
+                                    class="skill-tag px-2 py-0.5 rounded text-xs"
+                                >
+                                    {{ skill.name || skill }}
+                                </span>
+                                <span v-if="tool.skills.length > 3" class="text-xs text-gray-400">
+                                    +{{ tool.skills.length - 3 }}
+                                </span>
+                            </div>
+                        </div>
+
+                        <!-- Actions -->
+                        <div class="px-5 py-3 border-t border-white/10">
+                            <button 
+                                @click="selectTool(tool)"
+                                class="w-full py-2 rounded-lg bg-gradient-to-r from-indigo-600 to-purple-600 hover:opacity-90 transition text-sm font-medium"
+                            >
+                                管理 {{ tool.name }}
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- ========== 公共资源库 ========== -->
+            <div v-if="mainTab === 'public'">
+                <!-- Public Skills Section -->
+                <div class="mb-8">
+                    <div class="flex items-center justify-between mb-4">
+                        <h2 class="text-lg font-semibold flex items-center gap-2">
+                            🌐 公共 Skill 库
+                            <span class="text-xs text-gray-400 font-normal">来源: D:\Obsidian\AI\交接文档\shared-skills\</span>
+                        </h2>
+                        <div class="flex gap-2">
+                            <input 
+                                v-model="publicSearchQuery"
+                                type="text"
+                                placeholder="搜索公共 Skills..."
+                                class="px-3 py-1 glass rounded-lg text-sm bg-transparent border border-white/10 focus:border-indigo-500 outline-none"
+                            >
+                        </div>
+                    </div>
+
+                    <!-- Public Skills Grid -->
+                    <div class="grid md:grid-cols-2 lg:grid-cols-3 gap-4">
+                        <div 
+                            v-for="skill in filteredPublicSkills" 
+                            :key="skill.name"
+                            class="tool-card glass rounded-xl p-4"
+                        >
+                            <div class="flex items-start gap-3 mb-3">
+                                <div class="w-10 h-10 rounded-lg public-tag flex items-center justify-center text-lg">
+                                    📦
+                                </div>
+                                <div class="flex-1">
+                                    <h3 class="font-medium text-sm">{{ skill.name }}</h3>
+                                    <p class="text-xs text-gray-400">{{ skill.category }}</p>
+                                </div>
+                                <span class="text-xs px-2 py-0.5 rounded bg-white/10 text-gray-300">{{ skill.tool }}</span>
+                            </div>
+                            <p class="text-xs text-gray-400 mb-3 line-clamp-2">{{ skill.description }}</p>
+                            <div class="flex gap-2">
+                                <button class="flex-1 py-1.5 rounded bg-indigo-600 hover:bg-indigo-700 text-xs transition">
+                                    📥 安装到 AgentHub
+                                </button>
+                                <button class="px-3 py-1.5 rounded glass hover:bg-white/10 text-xs transition">
+                                    👁️ 查看
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div v-if="filteredPublicSkills.length === 0" class="text-center py-8 text-gray-400">
+                        没有找到匹配的公共 Skills
+                    </div>
+                </div>
+
+                <!-- Other Public Resources -->
+                <div>
+                    <h2 class="text-lg font-semibold mb-4 flex items-center gap-2">
+                        📚 其他公共资源
+                    </h2>
+                    <div class="grid md:grid-cols-2 lg:grid-cols-4 gap-4">
+                        <div 
+                            v-for="resource in publicResources" 
+                            :key="resource.name"
+                            class="tool-card glass rounded-xl p-4"
+                        >
+                            <div class="flex items-center gap-3 mb-2">
+                                <div class="folder-icon w-8 h-8 rounded-lg flex items-center justify-center text-lg">
+                                    {{ resource.icon }}
+                                </div>
+                                <div>
+                                    <h3 class="font-medium text-sm">{{ resource.name }}</h3>
+                                    <p class="text-xs text-gray-400">{{ resource.count }}</p>
+                                </div>
+                            </div>
+                            <p class="text-xs text-gray-400">{{ resource.description }}</p>
+                            <button class="mt-3 w-full py-1.5 rounded glass hover:bg-white/10 text-xs transition">
+                                打开位置
+                            </button>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Import from Shared Skills -->
+                <div class="mt-8 glass rounded-2xl p-6">
+                    <h3 class="font-semibold mb-4">📂 从共享文件夹导入</h3>
+                    <div class="grid md:grid-cols-2 gap-4">
+                        <div class="glass rounded-xl p-4">
+                            <div class="flex items-center gap-3 mb-2">
+                                <span class="text-2xl">📁</span>
+                                <div>
+                                    <h4 class="font-medium text-sm">共享 Skills 目录</h4>
+                                    <p class="text-xs text-gray-400">D:\Obsidian\AI\交接文档\shared-skills\</p>
+                                </div>
+                            </div>
+                            <p class="text-xs text-gray-400 mb-3">包含 {{ sharedSkillsCount }} 个共享 Skill，可一键导入到 AgentHub</p>
+                            <button class="w-full py-2 rounded bg-gradient-to-r from-green-600 to-emerald-600 hover:opacity-90 text-sm transition">
+                                🔄 同步共享 Skills
+                            </button>
+                        </div>
+                        <div class="glass rounded-xl p-4">
+                            <div class="flex items-center gap-3 mb-2">
+                                <span class="text-2xl">💾</span>
+                                <div>
+                                    <h4 class="font-medium text-sm">备份与恢复</h4>
+                                    <p class="text-xs text-gray-400">C:\Users\Chatxavier\.agenthub\backup\</p>
+                                </div>
+                            </div>
+                            <p class="text-xs text-gray-400 mb-3">将当前配置备份到云端或从云端恢复</p>
+                            <button class="w-full py-2 rounded glass hover:bg-white/10 text-sm transition">
+                                🗂️ 创建备份
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- ========== AgentHub 配置 ========== -->
+            <div v-if="mainTab === 'config'">
+                <!-- AgentHub Default Config Folder -->
+                <div class="glass rounded-2xl p-6 mb-6">
+                    <h2 class="text-lg font-semibold mb-4 flex items-center gap-2">
+                        🤖 AgentHub 默认配置文件夹
+                    </h2>
+                    <div class="grid md:grid-cols-2 gap-6">
+                        <div class="glass rounded-xl p-5">
+                            <div class="flex items-center gap-3 mb-4">
+                                <div class="w-12 h-12 rounded-xl bg-gradient-to-br from-indigo-500 to-purple-600 flex items-center justify-center text-2xl">
+                                    🤖
+                                </div>
+                                <div>
+                                    <h3 class="font-semibold">AgentHub 配置目录</h3>
+                                    <p class="text-xs text-gray-400">C:\Users\Chatxavier\.agenthub</p>
+                                </div>
+                            </div>
+                            <div class="space-y-2 text-sm mb-4">
+                                <div class="flex justify-between py-2 border-b border-white/10">
+                                    <span class="text-gray-400">状态</span>
+                                    <span :class="agenthubConfig.detected ? 'text-green-400' : 'text-red-400'">
+                                        {{ agenthubConfig.detected ? '✅ 已创建' : '❌ 未创建' }}
+                                    </span>
+                                </div>
+                                <div class="flex justify-between py-2 border-b border-white/10">
+                                    <span class="text-gray-400">Skills</span>
+                                    <span class="text-indigo-400">{{ agenthubConfig.skills.length }} 个</span>
+                                </div>
+                                <div class="flex justify-between py-2 border-b border-white/10">
+                                    <span class="text-gray-400">Agents</span>
+                                    <span class="text-blue-400">{{ agenthubConfig.agents.length }} 个</span>
+                                </div>
+                                <div class="flex justify-between py-2">
+                                    <span class="text-gray-400">版本</span>
+                                    <span class="text-yellow-400">v0.1.0</span>
+                                </div>
+                            </div>
+                            <button v-if="!agenthubConfig.detected" class="w-full py-2 rounded bg-gradient-to-r from-indigo-600 to-purple-600 hover:opacity-90 text-sm transition">
+                                📁 初始化配置文件夹
+                            </button>
+                            <button v-else class="w-full py-2 rounded glass hover:bg-white/10 text-sm transition">
+                                📂 打开配置文件夹
+                            </button>
+                        </div>
+
+                        <!-- Config Directory Structure -->
+                        <div class="glass rounded-xl p-5">
+                            <h3 class="font-semibold mb-4">📂 目录结构</h3>
+                            <div class="text-sm space-y-1 font-mono">
+                                <div class="text-gray-400">.agenthub/</div>
+                                <div v-for="folder in agenthubFolders" :key="folder.name" class="pl-4 flex items-center gap-2">
+                                    <span class="text-blue-400">📁</span>
+                                    <span>{{ folder.name }}/</span>
+                                    <span class="text-gray-500 text-xs">{{ folder.desc }}</span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- AgentHub Skills Management -->
+                <div class="glass rounded-2xl p-6">
+                    <div class="flex items-center justify-between mb-4">
+                        <h2 class="text-lg font-semibold">🛠️ AgentHub Skills ({{ agenthubConfig.skills.length }})</h2>
+                        <button class="px-4 py-2 bg-gradient-to-r from-indigo-600 to-purple-600 rounded-lg hover:opacity-90 text-sm transition">
+                            + 安装新 Skill
+                        </button>
+                    </div>
+                    
+                    <div v-if="agenthubConfig.skills.length === 0" class="text-center py-8 text-gray-400">
+                        <p class="mb-4">还没有安装任何 Skills</p>
+                        <button class="px-4 py-2 glass rounded-lg hover:bg-white/10 text-sm">
+                            从公共库安装
+                        </button>
+                    </div>
+
+                    <div v-else class="grid md:grid-cols-2 gap-4">
+                        <div 
+                            v-for="skill in agenthubConfig.skills" 
+                            :key="skill.name"
+                            class="glass rounded-xl p-4 flex items-center justify-between"
+                        >
+                            <div class="flex items-center gap-3">
+                                <div class="w-10 h-10 rounded-lg bg-gradient-to-br from-indigo-500 to-purple-600 flex items-center justify-center">
+                                    📦
+                                </div>
+                                <div>
+                                    <div class="font-medium text-sm">{{ skill.name }}</div>
+                                    <div class="text-xs text-gray-400">{{ skill.source || '本地安装' }}</div>
+                                </div>
+                            </div>
+                            <div class="flex gap-2">
+                                <button class="px-3 py-1 glass rounded hover:bg-white/10 text-xs">编辑</button>
+                                <button class="px-3 py-1 rounded bg-red-500/20 text-red-400 hover:bg-red-500/30 text-xs">移除</button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Quick Setup -->
+                <div class="mt-6 glass rounded-2xl p-6">
+                    <h3 class="font-semibold mb-4">🚀 快速设置</h3>
+                    <div class="grid md:grid-cols-3 gap-4">
+                        <button class="glass rounded-xl p-4 hover:bg-white/10 transition text-left">
+                            <div class="text-2xl mb-2">📥</div>
+                            <div class="font-medium text-sm">从 OpenCode 导入</div>
+                            <div class="text-xs text-gray-400 mt-1">复制 OpenCode 的 Skills 到 AgentHub</div>
+                        </button>
+                        <button class="glass rounded-xl p-4 hover:bg-white/10 transition text-left">
+                            <div class="text-2xl mb-2">📥</div>
+                            <div class="font-medium text-sm">从 Hermes 导入</div>
+                            <div class="text-xs text-gray-400 mt-1">复制 Hermes 的 Skills 到 AgentHub</div>
+                        </button>
+                        <button class="glass rounded-xl p-4 hover:bg-white/10 transition text-left">
+                            <div class="text-2xl mb-2">🌐</div>
+                            <div class="font-medium text-sm">从公共库安装</div>
+                            <div class="text-xs text-gray-400 mt-1">从共享 Skills 目录安装</div>
+                        </button>
+                    </div>
+                </div>
+            </div>
+
+        </main>
+
+        <!-- Detail Modal -->
+        <div v-if="selectedTool" class="fixed inset-0 z-50 modal-overlay flex items-center justify-center p-4" @click.self="selectedTool = null">
+            <div class="glass rounded-2xl w-full max-w-4xl max-h-[90vh] overflow-hidden flex flex-col">
+                <!-- Modal Header -->
+                <div class="p-6 border-b border-white/10 flex items-center justify-between">
+                    <div class="flex items-center gap-4">
+                        <div 
+                            class="w-14 h-14 rounded-xl flex items-center justify-center text-2xl"
+                            :style="{ background: selectedTool.color }"
+                        >
+                            {{ selectedTool.icon }}
+                        </div>
+                        <div>
+                            <h2 class="text-xl font-bold">{{ selectedTool.name }}</h2>
+                            <p class="text-sm text-gray-400">{{ selectedTool.configPath }}</p>
+                        </div>
+                    </div>
+                    <button @click="selectedTool = null" class="p-2 hover:bg-white/10 rounded-lg transition">
+                        <span class="text-2xl">×</span>
+                    </button>
+                </div>
+
+                <!-- Modal Content -->
+                <div class="flex-1 overflow-auto p-6 scrollbar-thin">
+                    <!-- Tab Navigation -->
+                    <div class="flex gap-2 mb-6">
+                        <button 
+                            v-for="tab in ['skills', 'agents', 'config']" 
+                            :key="tab"
+                            @click="activeTab = tab"
+                            :class="activeTab === tab ? 'bg-indigo-600' : 'glass hover:bg-white/10'"
+                            class="px-4 py-2 rounded-lg text-sm transition capitalize"
+                        >
+                            {{ tab === 'skills' ? '🛠️ Skills' : tab === 'agents' ? '🤖 Agents' : '⚙️ 配置' }}
+                        </button>
+                    </div>
+
+                    <!-- Skills Tab -->
+                    <div v-if="activeTab === 'skills'">
+                        <div class="flex items-center justify-between mb-4">
+                            <h3 class="font-semibold">{{ selectedTool.name }} Skills ({{ selectedTool.skills.length }})</h3>
+                            <button class="px-4 py-2 glass rounded-lg hover:bg-white/10 text-sm">
+                                + 安装新 Skill
+                            </button>
+                        </div>
+                        
+                        <div v-if="selectedTool.skills.length === 0" class="text-center py-8 text-gray-400">
+                            没有安装任何 Skills
+                        </div>
+
+                        <div class="space-y-3">
+                            <div 
+                                v-for="skill in selectedTool.skills" 
+                                :key="skill.name || skill"
+                                class="glass rounded-xl p-4 flex items-center justify-between"
+                            >
+                                <div class="flex items-center gap-3">
+                                    <div class="w-10 h-10 rounded-lg bg-gradient-to-br from-indigo-500 to-purple-600 flex items-center justify-center">
+                                        📦
+                                    </div>
+                                    <div>
+                                        <div class="font-medium">{{ skill.name || skill }}</div>
+                                        <div class="text-xs text-gray-400">{{ skill.path || '' }}</div>
+                                    </div>
+                                </div>
+                                <div class="flex gap-2">
+                                    <button class="px-3 py-1 glass rounded hover:bg-white/10 text-xs">查看</button>
+                                    <button class="px-3 py-1 rounded bg-red-500/20 text-red-400 hover:bg-red-500/30 text-xs">移除</button>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Agents Tab -->
+                    <div v-if="activeTab === 'agents'">
+                        <div class="flex items-center justify-between mb-4">
+                            <h3 class="font-semibold">{{ selectedTool.name }} Agents ({{ selectedTool.agents.length }})</h3>
+                            <button class="px-4 py-2 glass rounded-lg hover:bg-white/10 text-sm">
+                                + 新建 Agent
+                            </button>
+                        </div>
+                        
+                        <div v-if="selectedTool.agents.length === 0" class="text-center py-8 text-gray-400">
+                            没有配置任何 Agents
+                        </div>
+
+                        <div class="space-y-3">
+                            <div 
+                                v-for="agent in selectedTool.agents" 
+                                :key="agent.name"
+                                class="glass rounded-xl p-4"
+                            >
+                                <div class="flex items-center justify-between">
+                                    <div class="flex items-center gap-3">
+                                        <div class="w-10 h-10 rounded-lg bg-gradient-to-br from-purple-500 to-pink-600 flex items-center justify-center">
+                                            🤖
+                                        </div>
+                                        <div>
+                                            <div class="font-medium">{{ agent.name }}</div>
+                                            <div class="text-xs text-gray-400">{{ agent.description || '暂无描述' }}</div>
+                                        </div>
+                                    </div>
+                                    <div class="flex items-center gap-2">
+                                        <span 
+                                            class="w-2 h-2 rounded-full"
+                                            :class="agent.enabled ? 'bg-green-400' : 'bg-gray-400'"
+                                        ></span>
+                                        <span class="text-xs text-gray-400">{{ agent.enabled ? '启用' : '禁用' }}</span>
+                                        <button class="px-3 py-1 glass rounded hover:bg-white/10 text-xs ml-2">编辑</button>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Config Tab -->
+                    <div v-if="activeTab === 'config'">
+                        <h3 class="font-semibold mb-4">{{ selectedTool.name }} 配置信息</h3>
+                        <div class="glass rounded-xl p-4">
+                            <div class="space-y-2 text-sm">
+                                <div v-for="(value, key) in selectedTool.configInfo" :key="key" class="flex justify-between py-2 border-b border-white/10">
+                                    <span class="text-gray-400">{{ key }}</span>
+                                    <span>{{ value }}</span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+    </div>
+
+    <script>
+        const { createApp, ref, computed } = Vue;
+
+        createApp({
+            setup() {
+                const mainTab = ref('local');
+                const filter = ref('all');
+                const activeTab = ref('skills');
+                const selectedTool = ref(null);
+                const publicSearchQuery = ref('');
+                const scanTime = ref('');
+
+                // 定义要检测的 AI 工具
+                const definedTools = [
+                    {
+                        id: 'opencode',
+                        name: 'OpenCode',
+                        icon: '⚡',
+                        color: 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)',
+                        description: 'AI 编程助手，支持代码补全、重构、解释',
+                        configPath: 'C:\\Users\\Chatxavier\\.config\\opencode',
+                        skillsPath: 'C:\\Users\\Chatxavier\\.config\\opencode\\skills',
+                        agentsPath: 'C:\\Users\\Chatxavier\\.config\\opencode\\agents',
+                    },
+                    {
+                        id: 'openclaw',
+                        name: 'OpenClaw',
+                        icon: '🦎',
+                        color: 'linear-gradient(135deg, #f093fb 0%, #f5576c 100%)',
+                        description: 'AI Agent 框架，支持多工具协作和任务编排',
+                        configPath: 'C:\\Users\\Chatxavier\\.openclaw',
+                        skillsPath: 'C:\\Users\\Chatxavier\\.openclaw\\skills',
+                        agentsPath: 'C:\\Users\\Chatxavier\\.openclaw\\subagents',
+                    },
+                    {
+                        id: 'claude',
+                        name: 'Claude Desktop',
+                        icon: '🧠',
+                        color: 'linear-gradient(135deg, #4facfe 0%, #00f2fe 100%)',
+                        description: 'Anthropic Claude 模型，本地桌面集成',
+                        configPath: 'C:\\Users\\Chatxavier\\.claude',
+                        skillsPath: 'C:\\Users\\Chatxavier\\.claude\\SKILLS',
+                        agentsPath: 'C:\\Users\\Chatxavier\\.claude\\agents',
+                    },
+                    {
+                        id: 'codebuddy',
+                        name: 'CodeBuddy',
+                        icon: '💻',
+                        color: 'linear-gradient(135deg, #43e97b 0%, #38f9d7 100%)',
+                        description: '通义灵码，国内生态 AI 编程助手',
+                        configPath: 'C:\\Users\\Chatxavier\\.codebuddy',
+                        skillsPath: 'C:\\Users\\Chatxavier\\.codebuddy\\skills-marketplace\\skills',
+                        agentsPath: 'C:\\Users\\Chatxavier\\.codebuddy\\instances.json',
+                    },
+                    {
+                        id: 'cursor',
+                        name: 'Cursor',
+                        icon: '📝',
+                        color: 'linear-gradient(135deg, #a8edea 0%, #fed6e3 100%)',
+                        description: 'AI 代码编辑器，基于 VSCode',
+                        configPath: 'C:\\Users\\Chatxavier\\.cursor',
+                        skillsPath: null,
+                        agentsPath: null,
+                    },
+                    {
+                        id: 'hermes',
+                        name: 'Hermes Agent',
+                        icon: '🐉',
+                        color: 'linear-gradient(135deg, #ff9a9e 0%, #fecfef 100%)',
+                        description: '终端 AI 助手，支持多工具集成',
+                        configPath: 'C:\\Users\\Chatxavier\\.hermes',
+                        skillsPath: 'C:\\Users\\Chatxavier\\.hermes\\skills',
+                        agentsPath: 'C:\\Users\\Chatxavier\\.hermes\\agents',
+                    },
+                    {
+                        id: 'agenthub',
+                        name: 'AgentHub',
+                        icon: '🤖',
+                        color: 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)',
+                        description: 'AI 工具管理平台，中央控制中心',
+                        configPath: 'C:\\Users\\Chatxavier\\.agenthub',
+                        skillsPath: 'C:\\Users\\Chatxavier\\.agenthub\\skills',
+                        agentsPath: 'C:\\Users\\Chatxavier\\.agenthub\\agents',
+                    },
+                ];
+
+                // 公共 Skill 库数据（来自 D:\Obsidian\AI\交接文档\shared-skills\）
+                const publicSkills = ref([
+                    // 开发类
+                    { name: '全栈开发', category: '开发', tool: '通用', description: 'Full-stack backend architecture and frontend-backend integration guidelines' },
+                    { name: '微信小程序开发框架', category: '开发', tool: '微信', description: 'WeChat Mini Program development framework with WXML/WXSS/JS' },
+                    { name: '123pan', category: '工具', tool: '通用', description: '123云盘文件管理，通过 OpenList WebDAV API 操作' },
+                    { name: 'ADB工具集', category: '开发', tool: 'Android', description: 'Android ADB 调试工具集，包含无线调试、短信查询、联系人读取' },
+                    { name: 'alipay-payment-integration', category: '开发', tool: '支付', description: '支付宝开放平台支付产品接入最佳实践' },
+                    { name: 'minimax-skill', category: '工具', tool: 'AI', description: 'MiniMax 开放平台 Token Plan 套餐余额与使用量查询' },
+                    // 效率类
+                    { name: '腾讯文档', category: '效率', tool: '腾讯', description: '腾讯文档在线云文档平台创建、编辑、管理' },
+                    { name: '腾讯问卷', category: '效率', tool: '腾讯', description: '腾讯问卷在线问卷调查平台' },
+                    { name: '飞书通知', category: '效率', tool: '飞书', description: '飞书消息发送能力，支持群组和用户私信' },
+                    { name: '邮件管理', category: '效率', tool: '通用', description: '邮箱管理技能，支持发送、读取、批量发送、HTML邮件' },
+                    { name: '日历管理', category: '效率', tool: 'Google', description: 'Google Workspace 日历命令行工具' },
+                    // 创意类
+                    { name: 'PPT制作', category: '创意', tool: '办公', description: 'AI演示文稿全流程制作：内容结构化→设计选型→AI插画' },
+                    { name: 'Word文档处理', category: '创意', tool: '办公', description: 'Word文档中文格式标准化处理' },
+                    { name: 'Excel处理', category: '创意', tool: '办公', description: 'Excel/ XLSX 创建、编辑、格式化' },
+                    { name: 'OCR文档识别', category: '创意', tool: '通用', description: 'PDF和扫描文档文字提取' },
+                    // 研究类
+                    { name: '论文写作工作流', category: '研究', tool: '学术', description: '论文写作工作流，支持文献调研、大纲设计、初稿写作' },
+                    { name: 'arXiv搜索', category: '研究', tool: '学术', description: 'arXiv 学术论文搜索与摘要获取' },
+                    { name: '百度学术搜索', category: '研究', tool: '学术', description: '百度学术文献搜索工具' },
+                    // AI/ML类
+                    { name: 'llama.cpp', category: 'AI/ML', tool: '推理', description: 'llama.cpp local GGUF inference + HF Hub model discovery' },
+                    { name: 'vLLM服务', category: 'AI/ML', tool: '推理', description: 'High throughput LLM serving with vLLM PagedAttention' },
+                    { name: 'HuggingFace工具', category: 'AI/ML', tool: '模型', description: 'Hugging Face Hub CLI - search, download, upload models' },
+                    { name: 'AI视频生成', category: 'AI/ML', tool: '视频', description: 'Remotion + AI 制作专业动效视频' },
+                    // 生活类
+                    { name: '健康Agent', category: '生活', tool: '健康', description: '健康 Agent — 心理健康与身体健康指导' },
+                    { name: '课程表查询', category: '生活', tool: '学生', description: '课表查询 Skill - 支持查询课程安排' },
+                    { name: '天气查询', category: '生活', tool: '通用', description: '获取当前天气和天气预报' },
+                    { name: '待办事项', category: '生活', tool: '通用', description: '任务列表管理，记录、查看、完成课程作业' },
+                ]);
+
+                // 其他公共资源
+                const publicResources = ref([
+                    { name: '共享 Skills', icon: '📦', count: '26+ Skills', description: 'D:\\Obsidian\\AI\\交接文档\\shared-skills\\' },
+                    { name: '用户画像', icon: '👤', count: '个人资料', description: 'D:\\Obsidian\\AI\\交接文档\\个人画像\\' },
+                    { name: '项目文档', icon: '📁', count: '待办/日志', description: 'D:\\Obsidian\\AI\\小落\\' },
+                    { name: '博客草稿', icon: '✍️', count: '文章', description: 'D:\\Obsidian\\AI\\blog-drafts\\' },
+                    { name: '知识库', icon: '📚', count: '笔记', description: 'D:\\Obsidian\\vault\\' },
+                    { name: '服务器备份', icon: '☁️', count: '远程', description: 'Sherry知识库 @ 8.215.68.48' },
+                    { name: 'AgentHub配置', icon: '🤖', count: '主配置', description: 'C:\\Users\\Chatxavier\\.agenthub\\' },
+                    { name: 'Windows配置', icon: '⚙️', count: '系统', description: 'C:\\Users\\Chatxavier\\.config\\' },
+                ]);
+
+                // AgentHub 配置文件夹结构
+                const agenthubFolders = ref([
+                    { name: 'skills', desc: '已安装的 Skills' },
+                    { name: 'agents', desc: 'Agent 配置文件' },
+                    { name: 'profile', desc: '用户画像' },
+                    { name: 'projects', desc: '项目管理' },
+                    { name: 'docs', desc: '文档' },
+                    { name: 'secrets', desc: '敏感配置' },
+                    { name: 'data', desc: '数据存储' },
+                    { name: 'backup', desc: '备份文件' },
+                    { name: 'logs', desc: '运行日志' },
+                ]);
+
+                // AgentHub 当前状态
+                const agenthubConfig = ref({
+                    detected: false,
+                    skills: [],
+                    agents: [],
+                });
+
+                // 工具列表
+                const tools = ref([]);
+
+                // 计算属性
+                const detectedCount = computed(() => tools.value.filter(t => t.detected).length);
+                const totalSkills = computed(() => tools.value.reduce((sum, t) => sum + t.skills.length, 0));
+                const totalAgents = computed(() => tools.value.reduce((sum, t) => sum + t.agents.length, 0));
+                const publicSkillsCount = computed(() => publicSkills.value.length);
+                const sharedSkillsCount = computed(() => publicSkills.value.length);
+
+                const filteredTools = computed(() => {
+                    if (filter.value === 'all') return tools.value;
+                    if (filter.value === 'installed') return tools.value.filter(t => t.detected);
+                    return tools.value.filter(t => !t.detected);
+                });
+
+                const filteredPublicSkills = computed(() => {
+                    if (!publicSearchQuery.value) return publicSkills.value;
+                    const q = publicSearchQuery.value.toLowerCase();
+                    return publicSkills.value.filter(s => 
+                        s.name.toLowerCase().includes(q) || 
+                        s.category.toLowerCase().includes(q) ||
+                        s.description.toLowerCase().includes(q)
+                    );
+                });
+
+                const toolHealth = computed(() => {
+                    if (tools.value.length === 0) return 0;
+                    return Math.round((detectedCount.value / tools.value.length) * 100);
+                });
+
+                // 方法
+                const selectTool = (tool) => {
+                    selectedTool.value = tool;
+                    activeTab.value = 'skills';
+                };
+
+                const refreshAll = async () => {
+                    await loadData();
+                };
+
+                const loadData = async () => {
+                    try {
+                        const response = await axios.get('http://localhost:5174/api/tools', { timeout: 2000 });
+                        const data = response.data;
+                        
+                        tools.value = data.tools.map(t => {
+                            const defined = definedTools.find(d => d.id === t.id) || {};
+                            return {
+                                ...defined,
+                                ...t,
+                                skills: t.skills.map(s => ({ name: s.name, path: s.path })),
+                                agents: t.agents || [],
+                                configInfo: t.configInfo || {},
+                            };
+                        });
+                        
+                        scanTime.value = new Date(data.scanTime).toLocaleString('zh-CN');
+                    } catch (error) {
+                        console.warn('API 不可用，使用模拟数据');
+                        await useMockData();
+                    }
+                };
+
+                const useMockData = async () => {
+                    const detectedTools = [
+                        {
+                            ...definedTools[0],
+                            detected: true,
+                            skills: [
+                                { name: '123-cloud', path: 'C:\\Users\\Chatxavier\\.config\\opencode\\skills\\123-cloud' },
+                                { name: '123pan', path: 'C:\\Users\\Chatxavier\\.config\\opencode\\skills\\123pan' },
+                                { name: '创业验证', path: 'C:\\Users\\Chatxavier\\.config\\opencode\\skills\\创业验证' },
+                                { name: '全栈开发', path: 'C:\\Users\\Chatxavier\\.config\\opencode\\skills\\全栈开发' },
+                                { name: '腾讯文档', path: 'C:\\Users\\Chatxavier\\.config\\opencode\\skills\\腾讯文档' },
+                                { name: '微信小程序开发框架', path: 'C:\\Users\\Chatxavier\\.config\\opencode\\skills\\微信小程序开发框架' },
+                                { name: 'adb-sms-query', path: 'C:\\Users\\Chatxavier\\.config\\opencode\\skills\\adb-sms-query' },
+                                { name: 'ai-work', path: 'C:\\Users\\Chatxavier\\.config\\opencode\\skills\\ai-work' },
+                                { name: 'alipay-payment-integration', path: 'C:\\Users\\Chatxavier\\.config\\opencode\\skills\\alipay-payment-integration' },
+                            ],
+                            agents: [
+                                { name: 'dev-agent', description: '开发 Agent', enabled: true },
+                                { name: 'life-agent', description: '生活 Agent', enabled: true },
+                            ],
+                            configInfo: {
+                                '版本': '2.1.0',
+                                '主题': 'dark',
+                                '语言': 'zh-CN',
+                                '工具数': '4',
+                            },
+                        },
+                        {
+                            ...definedTools[1],
+                            detected: true,
+                            skills: [
+                                { name: 'alipay-payment-integration', path: 'C:\\Users\\Chatxavier\\.openclaw\\skills\\alipay-payment-integration' },
+                                { name: 'course-schedule', path: 'C:\\Users\\Chatxavier\\.openclaw\\skills\\course-schedule' },
+                                { name: 'feishu-notify', path: 'C:\\Users\\Chatxavier\\.openclaw\\skills\\feishu-notify' },
+                                { name: 'minimax-skill', path: 'C:\\Users\\Chatxavier\\.openclaw\\skills\\minimax-skill' },
+                                { name: 'skill-finder.skill', path: 'C:\\Users\\Chatxavier\\.openclaw\\skills\\skill-finder.skill' },
+                            ],
+                            agents: [],
+                            configInfo: {
+                                '版本': '1.5.2',
+                                '主题': 'dark',
+                                '语言': 'zh-CN',
+                                '工具数': '12',
+                            },
+                        },
+                        {
+                            ...definedTools[2],
+                            detected: true,
+                            skills: [],
+                            agents: [],
+                            configInfo: {
+                                '版本': 'Desktop 1.0',
+                                '主题': 'system',
+                            },
+                        },
+                        {
+                            ...definedTools[3],
+                            detected: true,
+                            skills: [
+                                { name: 'research', path: 'C:\\Users\\Chatxavier\\.codebuddy\\skills-marketplace\\research' },
+                            ],
+                            agents: [],
+                            configInfo: {
+                                '版本': '2.3.0',
+                                '实例数': '1',
+                            },
+                        },
+                        {
+                            ...definedTools[4],
+                            detected: false,
+                            skills: [],
+                            agents: [],
+                            configInfo: {},
+                        },
+                        {
+                            ...definedTools[5],
+                            detected: true,
+                            skills: [
+                                { name: 'hermes-agent', path: 'C:\\Users\\Chatxavier\\.hermes\\skills\\hermes-agent' },
+                                { name: 'dev-agent', path: 'C:\\Users\\Chatxavier\\.hermes\\skills\\dev-agent' },
+                            ],
+                            agents: [],
+                            configInfo: {
+                                '版本': '0.9.x',
+                                '记忆': 'mem0',
+                            },
+                        },
+                        {
+                            ...definedTools[6],
+                            detected: false,
+                            skills: [],
+                            agents: [],
+                            configInfo: {
+                                '版本': '0.1.0',
+                                '状态': '未初始化',
+                            },
+                        },
+                    ];
+
+                    tools.value = detectedTools;
+                    scanTime.value = new Date().toLocaleString('zh-CN');
+                };
+
+                // 初始化
+                loadData();
+
+                return {
+                    mainTab,
+                    filter,
+                    activeTab,
+                    selectedTool,
+                    publicSearchQuery,
+                    scanTime,
+                    tools,
+                    publicSkills,
+                    publicResources,
+                    agenthubFolders,
+                    agenthubConfig,
+                    detectedCount,
+                    totalSkills,
+                    totalAgents,
+                    publicSkillsCount,
+                    sharedSkillsCount,
+                    filteredTools,
+                    filteredPublicSkills,
+                    toolHealth,
+                    selectTool,
+                    refreshAll,
+                };
+            }
+        }).mount('#app');
+    </script>
+</body>
+</html>
