@@ -148,38 +148,135 @@ memory/
 
 **Windows (PowerShell):**
 ```powershell
-irm https://raw.githubusercontent.com/xuanyuanluoxue/AgentHub/main/scripts/install.ps1 | iex
+irm https://raw.githubusercontent.com/xuanyuanluoxue/AgentHub/v0.1.0-beta.1/scripts/install.ps1 | iex
 ```
 
 **Linux / macOS / WSL:**
 ```bash
-curl -fsSL https://raw.githubusercontent.com/xuanyuanluoxue/AgentHub/main/scripts/install.sh | bash
+curl -fsSL https://raw.githubusercontent.com/xuanyuanluoxue/AgentHub/v0.1.0-beta.1/scripts/install.sh | bash -s -- --install
+```
+
+安装完成后运行初始化：
+```bash
+cd ~/.agenthub
+pip install -e .
+agenthub init
 ```
 
 ### 手动安装
 
 ```bash
-# 1. 克隆仓库
 git clone https://github.com/xuanyuanluoxue/AgentHub.git ~/.agenthub
-
-# 2. 安装 Python 包
 cd ~/.agenthub
 pip install -e .
-
-# 3. 初始化配置
-agenthub init --template    # 快速初始化（使用模板）
-agenthub init              # 交互式初始化（自定义名称）
-
-# 4. 开始使用
-agenthub --help
+agenthub init
 ```
 
-### 安装后
+---
+
+## 🤖 AI 助手接入指南
+
+> 将以下内容复制给 AI 阅读，AI 即可自动接入 AgentHub 项目
+
+```markdown
+# AgentHub 项目接入指南
+
+## 项目概述
+
+AgentHub 是一个统一 AI 工具的四大共享生态平台：
+- **Skill** — 跨工具共享的技能库
+- **Agent** — 跨工具共享的 Agent 配置
+- **Profile** — 用户的身份、偏好、联系人
+- **Memory** — 多层持久化记忆系统
+
+## 快速接入（必须执行）
+
+### Step 1 — 安装 AgentHub
+
+**Linux / macOS / WSL:**
+```bash
+curl -fsSL https://raw.githubusercontent.com/xuanyuanluoxue/AgentHub/v0.1.0-beta.1/scripts/install.sh | bash -s -- --install
+cd ~/.agenthub && pip install -e . && agenthub init
+```
+
+**Windows PowerShell:**
+```powershell
+irm https://raw.githubusercontent.com/xuanyuanluoxue/AgentHub/v0.1.0-beta.1/scripts/install.ps1 | iex
+```
+
+### Step 2 — 注册自己到 Agent 注册表
+
+读取 `~/.agenthub/agents/registry.json`，若自己未在其中，执行注册：
+
+```python
+import json, os
+from datetime import datetime
+
+path = os.path.expanduser("~/.agenthub/agents/registry.json")
+os.makedirs(os.path.dirname(path), exist_ok=True)
+reg = json.load(open(path)) if os.path.exists(path) else {"agents": {}}
+
+# 使用你自己的 Agent ID（格式：英文/数字/短横线）
+my_id = "my-agent-id"  # 替换为你的实际 ID
+if my_id not in reg["agents"]:
+    reg["agents"][my_id] = {
+        "id": my_id,
+        "signature": f"[{my_id}]",
+        "display_name": "我的AI助手",
+        "type": "general",
+        "first_seen": datetime.utcnow().strftime("%Y-%m-%dT%H:%M:%SZ"),
+        "last_active": datetime.utcnow().strftime("%Y-%m-%dT%H:%M:%SZ"),
+        "capabilities": [],
+        "platform": "opencode",  # 根据你的平台填写
+        "status": "active"
+    }
+    json.dump(reg, open(path,"w"), ensure_ascii=False, indent=2)
+    print(f"[{my_id}] 注册成功")
+else:
+    print(f"[{my_id}] 已注册")
+```
+
+### Step 3 — 读取用户画像
 
 ```bash
-agenthub skill list        # 查看已安装 Skills
-agenthub agent list        # 查看已安装 Agents
-agenthub profile validate   # 验证配置
+cat ~/.agenthub/profile/identity.yaml
+cat ~/.agenthub/profile/contacts/*.yaml 2>/dev/null || echo "暂无联系人"
+```
+
+### Step 4 — 了解记忆系统
+
+检查目录存在：
+```bash
+ls ~/.agenthub/memory/short_term/ 2>/dev/null || echo "空"
+ls ~/.agenthub/memory/long_term/ 2>/dev/null || echo "空"
+```
+
+## 工作流程
+
+1. **读取上下文** → 先读 `~/.agenthub/profile/` 和记忆目录
+2. **注册活动** → 每次对话结束，向 `memory/short_term/` 写入摘要
+3. **更新状态** → 定期更新 `registry.json` 的 `last_active`
+4. **知识沉淀** → 重要信息写入 `memory/long_term/`
+
+## 关键文件路径
+
+| 路径 | 说明 |
+|------|------|
+| `~/.agenthub/agents/registry.json` | Agent 注册表 |
+| `~/.agenthub/profile/identity.yaml` | 用户身份画像 |
+| `~/.agenthub/memory/short_term/` | 短期记忆（会话级） |
+| `~/.agenthub/memory/long_term/` | 长期记忆（持久化） |
+| `~/.agenthub/skills/` | 已安装 Skills |
+| `~/.agenthub/docs/` | 项目文档 |
+
+## 详细文档
+
+- [AI 使用指南](./docs/for-ai/AI_GUIDE.md) — 完整初始化流程
+- [Skill 规范](./docs/design/skill-format.md) — 如何编写/使用 Skill
+- [Agent 规范](./docs/design/agent-format.md) — Agent 配置格式
+- [记忆系统](./docs/design/memory-system.md) — 多层记忆架构
+
+**完成以上步骤后，你即可开始在 AgentHub 生态中工作。**
 ```
 
 ---
