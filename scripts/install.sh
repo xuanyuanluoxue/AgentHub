@@ -2,12 +2,38 @@
 # AgentHub 一键安装脚本 - Linux/macOS/WSL
 #
 # 用法:
-#   curl -fsSL https://raw.githubusercontent.com/xuanyuanluoxue/AgentHub/main/scripts/install.sh | bash
-#   或
-#   bash install.sh
+#   curl -fsSL https://.../install.sh | bash        # 非交互模式（管道）
+#   curl -fsSL https://.../install.sh | bash -s -- -y  # 强制非交互
+#   bash install.sh                              # 交互模式
+#   bash install.sh -y                           # 非交互模式
 #
 
 set -e
+
+# ============================================
+# 检测是否为管道输入（非交互必须）
+# ============================================
+# 方法: 如果 /dev/stdin 是管道文件而非终端，始终非交互
+is_piped() {
+    # 管道: [ -p /dev/stdin ] 为真
+    # FIFO: [ -p /dev/fd/0 ] 为真
+    # 终端: [ -c /dev/stdin ] 为真 (character device)
+    # 文件: [ -f /dev/stdin ] 为真
+
+    if [ -p /dev/stdin ] || [ -p /dev/fd/0 ]; then
+        return 0  # 是管道
+    fi
+
+    # 如果 stdin 是文件且有内容（重定向）
+    if [ -f /dev/stdin ]; then
+        local bytes=$(cat /dev/stdin 2>/dev/null | wc -c)
+        if [ "$bytes" -gt 0 ]; then
+            return 0  # 有输入内容
+        fi
+    fi
+
+    return 1  # 非管道
+}
 
 # ============================================
 # 颜色定义
@@ -28,20 +54,18 @@ NC='\033[0m'
 REPO_URL="https://github.com/xuanyuanluoxue/AgentHub.git"
 INSTALL_DIR="${HOME}/.agenthub"
 BACKUP_DIR="${HOME}/.agenthub.backup.$(date +%Y%m%d%H%M%S)"
-SPINNER_PID=""
-SPINNER_CHARS="/-\|"
-SKIP_PROMPTS=false
+INTERACTIVE=true
 
-# 解析参数
+# 解析参数（必须在任何提示之前）
 while [[ $# -gt 0 ]]; do
     case $1 in
         -y|--yes|--non-interactive)
-            SKIP_PROMPTS=true
+            INTERACTIVE=false
             shift
             ;;
         -h|--help)
-            echo "用法: $0 [-y|--yes] [安装目录]"
-            echo "  -y, --yes          非交互模式，自动确认所有提示"
+            echo "用法: $0 [-y] [安装目录]"
+            echo "  -y, --yes  非交互模式，自动确认所有提示"
             exit 0
             ;;
         *)
@@ -50,6 +74,11 @@ while [[ $# -gt 0 ]]; do
             ;;
     esac
 done
+
+# 如果是管道输入，自动非交互
+if is_piped; then
+    INTERACTIVE=false
+fi
 
 # ============================================
 # 日志函数
@@ -60,32 +89,6 @@ log_warn() { echo -e "${YELLOW}⚠${NC} $1"; }
 log_error() { echo -e "${RED}✗${NC} $1"; }
 log_step() { echo -e "${CYAN}▸${NC} $1"; }
 log_dim() { echo -e "${DIM}$1${NC}"; }
-
-# ============================================
-# 进度动画
-# ============================================
-start_spinner() {
-    local message="$1"
-    echo -ne "${DIM}${message} ${SPINNER_CHARS:0:1}${NC}"
-    SPINNER_PID=$!
-    (
-        local i=1
-        while true; do
-            sleep 0.15
-            echo -ne "\b${SPINNER_CHARS:$((i++ % 4)):1}"
-        done
-    ) &
-    SPINNER_PID=$!
-}
-
-stop_spinner() {
-    if [ -n "$SPINNER_PID" ]; then
-        kill $SPINNER_PID 2>/dev/null || true
-        wait $SPINNER_PID 2>/dev/null || true
-        echo -e "\b${GREEN}✓${NC}"
-        SPINNER_PID=""
-    fi
-}
 
 # ============================================
 # 分隔线
@@ -105,11 +108,36 @@ print_banner() {
     echo -e "${BOLD}${MAGENTA}║${NC}          ${BOLD}${GREEN}██║   ██║██║   ██║██████╔╝██████╔╝ ╚████╔╝ ${NC}          ${BOLD}${MAGENTA}║${NC}"
     echo -e "${BOLD}${MAGENTA}║${NC}          ${BOLD}${GREEN}╚██╗ ██╔╝██║   ██║██╔══██╗██╔══██╗  ╚██╔╝  ${NC}          ${BOLD}${MAGENTA}║${NC}"
     echo -e "${BOLD}${MAGENTA}║${NC}          ${BOLD}${GREEN} ╚████╔╝ ╚██████╔╝██████╔╝██████╔╝   ██║   ${NC}          ${BOLD}${MAGENTA}║${NC}"
-    echo -e "${BOLD}${MAGENTA}║${NC}          ${BOLD}${GREEN}  ╚═══╝   ╚═════╝ ╚═════╝ ╚═════╝    ╚═╝   ${NC}          ${BOLD}${MAGENTA}║${NC}"
     echo -e "${BOLD}${MAGENTA}║${NC}                     ${BOLD}${CYAN}统一 AI 工具四大共享生态${NC}                    ${BOLD}${MAGENTA}║${NC}"
     echo -e "${BOLD}${MAGENTA}║${NC}                     ${DIM}Skill · Agent · 画像 · 记忆系统${NC}                     ${BOLD}${MAGENTA}║${NC}"
     echo -e "${BOLD}${MAGENTA}╚══════════════════════════════════════════════════════════╝${NC}"
     echo ""
+}
+
+# ============================================
+# 确认提示（仅交互模式）
+# ============================================
+confirm() {
+    local message="$1"
+    local default="${2:-N}"
+
+    if [ "$INTERACTIVE" = false ]; then
+        return 0  # 非交互模式，始终确认
+    fi
+
+    if [ "$default" = "Y" ]; then
+        echo -n "$message [Y/n]: "
+    else
+        echo -n "$message [y/N]: "
+    fi
+
+    read -n 1 -r
+    echo ""
+
+    if [[ $REPLY =~ ^[Yy]$ ]] || [[ -z $REPLY && "$default" == "Y" ]]; then
+        return 0
+    fi
+    return 1
 }
 
 # ============================================
@@ -169,19 +197,7 @@ backup_existing() {
         print_divider
         log_warn "发现已存在的 AgentHub 配置"
 
-        # 非交互模式或 --yes 参数自动跳过备份
-        if [ "$SKIP_PROMPTS" = true ] || [ ! -t 0 ]; then
-            log_info "非交互模式，自动跳过备份"
-            rm -rf "${INSTALL_DIR}"
-            echo ""
-            return 0
-        fi
-
-        echo -n "  是否备份? ${CYAN}[y/N]${NC}: "
-        read -n 1 -r
-        echo ""
-
-        if [[ $REPLY =~ ^[Yy]$ ]]; then
+        if confirm "  是否备份?"; then
             log_info "正在备份到 ${BACKUP_DIR}..."
             if mv "${INSTALL_DIR}" "${BACKUP_DIR}" 2>/dev/null; then
                 log_success "备份完成"
@@ -248,27 +264,27 @@ install_package() {
     local install_ok=false
     local install_method=""
 
-    # 方法 1: pip install --user (推荐，用户级安装)
-    log_dim "  尝试方法 1: pip install --user..."
+    # 方法 1: pip install --user (推荐)
+    log_dim "  尝试: pip install --user..."
     if pip install --user -e . 2>&1; then
         install_ok=true
-        install_method="--user"
+        install_method="pip --user"
     fi
 
     # 方法 2: pip install --break-system-packages
     if [ "$install_ok" = false ]; then
         echo ""
-        log_dim "  尝试方法 2: pip install --break-system-packages..."
+        log_dim "  尝试: pip install --break-system-packages..."
         if pip install --break-system-packages -e . 2>&1; then
             install_ok=true
-            install_method="--break-system-packages"
+            install_method="pip --break-system-packages"
         fi
     fi
 
     # 方法 3: python3 -m pip install --user
     if [ "$install_ok" = false ]; then
         echo ""
-        log_dim "  尝试方法 3: python3 -m pip install --user..."
+        log_dim "  尝试: python3 -m pip install --user..."
         if python3 -m pip install --user -e . 2>&1; then
             install_ok=true
             install_method="python3 -m pip --user"
@@ -278,7 +294,7 @@ install_package() {
     # 方法 4: sudo python3 -m pip
     if [ "$install_ok" = false ]; then
         echo ""
-        log_dim "  尝试方法 4: sudo python3 -m pip..."
+        log_dim "  尝试: sudo python3 -m pip..."
         if sudo python3 -m pip install -e . 2>&1; then
             install_ok=true
             install_method="sudo python3 -m pip"
@@ -296,7 +312,7 @@ install_package() {
         echo -e "  ${CYAN}cd ~/.agenthub${NC}"
         echo -e "  ${CYAN}pip install --user -e .${NC}"
         echo ""
-        log_info "或者创建虚拟环境:"
+        log_info "或创建虚拟环境:"
         echo -e "  ${CYAN}python3 -m venv ~/.agenthub/.venv${NC}"
         echo -e "  ${CYAN}~/.agenthub/.venv/bin/pip install -e .${NC}"
         echo ""
@@ -304,7 +320,7 @@ install_package() {
     fi
     echo ""
 
-    # 确保用户 bin 目录在 PATH 中
+    # PATH 提示
     local user_bin="${HOME}/.local/bin"
     if [ -d "$user_bin" ] && [[ ":$PATH:" != *":$user_bin:"* ]]; then
         echo -e "  ${YELLOW}⚠${NC} 建议将 ${CYAN}$user_bin${NC} 添加到 PATH"
@@ -329,13 +345,11 @@ init_config() {
     echo -e "${BOLD}▸ 初始化配置${NC}"
     print_divider
 
-    # 创建必要的目录
     mkdir -p "${INSTALL_DIR}/skills"
     mkdir -p "${INSTALL_DIR}/agents"
     mkdir -p "${INSTALL_DIR}/profile"
     mkdir -p "${INSTALL_DIR}/apps"
 
-    # 检查是否已有配置
     if [ -f "${INSTALL_DIR}/profile/identity.yaml" ]; then
         log_info "配置文件已存在，跳过初始化"
         echo ""
@@ -344,7 +358,6 @@ init_config() {
 
     log_info "创建默认配置文件..."
 
-    # 创建默认 identity.yaml
     cat > "${INSTALL_DIR}/profile/identity.yaml" << 'EOF'
 name: Your Name
 bio: AI enthusiast and developer
@@ -356,7 +369,6 @@ preferences:
   theme: auto
 EOF
 
-    # 创建 registry.json
     echo '{"skills": [], "agents": [], "version": "1.0"}' > "${INSTALL_DIR}/registry.json"
 
     log_success "配置文件创建完成"
@@ -384,12 +396,10 @@ print_complete() {
     echo -e "     ${DIM}agenthub clawhub search github${NC}"
     echo ""
 
-    # 检查 PATH
     if command -v agenthub &> /dev/null; then
         echo -e "  ${GREEN}✓${NC} ${CYAN}agenthub${NC} 已添加到 PATH"
     else
-        echo -e "  ${YELLOW}⚠${NC} agenthub 未找到，请重新打开终端或执行:"
-        echo -e "     ${GREEN}source ~/.bashrc${NC}"
+        echo -e "  ${YELLOW}⚠${NC} agenthub 未找到，请重新打开终端"
     fi
 
     echo ""
@@ -409,10 +419,5 @@ main() {
     init_config
     print_complete
 }
-
-# 检查是否提供了安装目录参数
-if [ -n "$1" ]; then
-    INSTALL_DIR="$1"
-fi
 
 main
