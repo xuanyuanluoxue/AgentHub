@@ -29,11 +29,15 @@ log_error() { echo -e "${RED}x${NC} $1"; }
 # ============================================
 print_banner() {
     echo ""
-    echo -e "  ${MAGENTA}┌─────────────────────────────────────┐${NC}"
-    echo -e "  ${MAGENTA}│${NC}             ${BOLD}${GREEN}AgentHub${NC}                  ${MAGENTA}│${NC}"
-    echo -e "  ${MAGENTA}│${NC}        ${CYAN}统一 AI 工具四大共享生态${NC}        ${MAGENTA}│${NC}"
-    echo -e "  ${MAGENTA}│${NC}      ${DIM}Skill · Agent · 画像 · 记忆${NC}      ${MAGENTA}│${NC}"
-    echo -e "  ${MAGENTA}└─────────────────────────────────────┘${NC}"
+    echo -e "  ${GREEN}    _                    _   _   _       _     ${NC}"
+    echo -e "  ${GREEN}   / \\   __ _  ___ _ __ | |_| | | |_   _| |__  ${NC}"
+    echo -e "  ${GREEN}  / _ \\ / _\` |/ _ \\ '_ \\| __| |_| | | | | '_ \\ ${NC}"
+    echo -e "  ${GREEN} / ___ \\ (_| |  __/ | | | |_|  _  | |_| | |_) |${NC}"
+    echo -e "  ${GREEN}/_/   \\_\\__, |\\___|_| |_|\__|_| |_|\\__,_|_.__/ ${NC}"
+    echo -e "  ${GREEN}        |___/                               ${NC}"
+    echo ""
+    echo -e "  ${CYAN}统一 AI 工具四大共享生态${NC}"
+    echo -e "  ${DIM}Skill · Agent · 画像 · 记忆${NC}"
     echo ""
 }
 
