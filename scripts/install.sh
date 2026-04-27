@@ -141,13 +141,8 @@ show_menu() {
 # 读取用户选择
 # ============================================
 get_choice() {
-    local choice=""
     echo -n "  请输入选项 [1-3]: "
-    if [ -t 0 ]; then
-        read -r choice
-    else
-        read -r choice </dev/tty 2>/dev/null
-    fi
+    read -r choice
     echo ""
     echo "$choice"
 }
@@ -155,6 +150,19 @@ get_choice() {
 # ============================================
 # 主流程
 # ============================================
+print_usage() {
+    echo ""
+    echo -e "  ${CYAN}用法:${NC}"
+    echo "    $0              # 交互式菜单"
+    echo "    $0 --install    # 非交互式安装"
+    echo "    $0 --uninstall  # 非交互式卸载"
+    echo "    $0 --help       # 显示帮助"
+    echo ""
+    echo -e "  ${DIM}管道模式示例:${NC}"
+    echo "    curl -fsSL .../install.sh | bash -- --install"
+    echo ""
+}
+
 main() {
     local action=""
 
@@ -163,9 +171,8 @@ main() {
             --install|-i) action="install" ;;
             --uninstall|-u) action="uninstall" ;;
             --help|-h)
-                echo "用法: $0 [--install|--uninstall]"
-                echo "  --install, -i   安装"
-                echo "  --uninstall, -u 卸载"
+                print_banner
+                print_usage
                 exit 0
                 ;;
         esac
@@ -180,6 +187,13 @@ main() {
     echo ""
 
     if [ -z "$action" ]; then
+        if ! [ -t 0 ]; then
+            echo -e "  ${RED}x 错误: 管道模式必须指定操作${NC}"
+            echo ""
+            print_usage
+            exit 1
+        fi
+
         if is_installed; then
             echo -e "  ${YELLOW}! 检测到已安装 AgentHub${NC}"
             echo ""
@@ -192,7 +206,7 @@ main() {
             1) action="install" ;;
             2) action="uninstall" ;;
             3) log_info "退出"; exit 0 ;;
-            *) echo -e "  ${YELLOW}! 无效选项，默认选择 [1]${NC}"; action="install" ;;
+            *) echo -e "  ${YELLOW}! 无效选项${NC}"; exit 1 ;;
         esac
     fi
 
@@ -201,14 +215,8 @@ main() {
             if is_installed; then
                 echo -e "  ${YELLOW}! 检测到已安装 AgentHub${NC}"
                 echo ""
-
                 echo -n "  是否重新安装? [y/N]: "
-                local reply=""
-                if [ -t 0 ]; then
-                    read -r reply
-                else
-                    read -r reply </dev/tty 2>/dev/null
-                fi
+                read -r reply
                 echo ""
                 if [[ ! $reply =~ ^[Yy]$ ]]; then
                     log_info "跳过安装"
@@ -220,12 +228,14 @@ main() {
         uninstall)
             case "$os_type" in
                 linux|macos)
+                    log_info "正在启动 ${os_name} 卸载程序..."
                     download_and_run \
                         "https://raw.githubusercontent.com/xuanyuanluoxue/AgentHub/main/scripts/${os_type}/uninstall.sh" \
                         "${os_name} 卸载脚本"
                     exit 0
                     ;;
                 windows)
+                    log_info "正在启动 Windows 卸载程序..."
                     powershell -ExecutionPolicy Bypass -Command "irm https://raw.githubusercontent.com/xuanyuanluoxue/AgentHub/main/scripts/windows/uninstall.ps1 | iex"
                     exit 0
                     ;;
