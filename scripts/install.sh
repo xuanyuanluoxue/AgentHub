@@ -141,8 +141,13 @@ show_menu() {
 # 读取用户选择
 # ============================================
 get_choice() {
+    local choice=""
     echo -n "  请输入选项 [1-3]: "
-    read choice
+    if [ -t 0 ]; then
+        read -r choice
+    else
+        read -r choice </dev/tty 2>/dev/null || choice="1"
+    fi
     echo ""
     echo "$choice"
 }
@@ -186,8 +191,8 @@ main() {
         case "$choice" in
             1) action="install" ;;
             2) action="uninstall" ;;
-            "") echo -e "  ${YELLOW}! 无输入，默认选择 [1]${NC}"; action="install" ;;
-            *) log_info "退出"; exit 0 ;;
+            3) log_info "退出"; exit 0 ;;
+            *) echo -e "  ${YELLOW}! 无效选项，默认选择 [1]${NC}"; action="install" ;;
         esac
     fi
 
