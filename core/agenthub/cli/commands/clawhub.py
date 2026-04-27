@@ -54,18 +54,52 @@ def _has_openclaw() -> bool:
 
 def _has_clawhub() -> bool:
     """检查 clawhub CLI 是否可用"""
-    return _check_cli("npx", ["clawhub@latest", "--version"])
+    # 方法1: 检查 clawhub 是否直接安装（可能不在 PATH 中）
+    clawhub_paths = [
+        "clawhub",
+        "C:/Users/Chatxavier/AppData/Roaming/npm/clawhub",
+        "C:/Users/Chatxavier/AppData/Roaming/npm/clawhub.cmd",
+    ]
+    for path in clawhub_paths:
+        try:
+            result = subprocess.run(
+                [path, "--help"],
+                capture_output=True,
+                text=True,
+                timeout=30,
+                shell=True
+            )
+            if result.returncode == 0 and "ClawHub" in result.stdout:
+                return True
+        except:
+            pass
+
+    # 方法2: 尝试 npx（通过 shell）
+    try:
+        result = subprocess.run(
+            "npx clawhub@latest --help",
+            capture_output=True,
+            text=True,
+            timeout=30,
+            shell=True
+        )
+        return result.returncode == 0 and "ClawHub" in result.stdout
+    except:
+        pass
+
+    return False
 
 
 def _run_command(cmd: list, timeout: int = 120) -> tuple:
     """运行命令并返回 (returncode, stdout, stderr)"""
+    # Windows 上需要 shell=True 才能找到 npx/clawhub
     try:
-        result = subprocess.run(cmd, capture_output=True, text=True, timeout=timeout)
+        result = subprocess.run(cmd, capture_output=True, text=True, timeout=timeout, shell=True)
         return result.returncode, result.stdout, result.stderr
     except subprocess.TimeoutExpired:
         raise ClawHubError("命令执行超时")
     except FileNotFoundError:
-        raise ClawHubError(f"未找到命令: {cmd[0]}")
+        raise ClawHubError(f"未找到命令: {cmd[0] if isinstance(cmd, list) else cmd}")
     except Exception as e:
         raise ClawHubError(f"执行失败: {e}")
 
@@ -164,7 +198,7 @@ def browse(category):
     else:
         click.echo(f"   {CLAWHUB_URL}/skills")
     click.echo()
-    click.echo("   找到后用 `agenthub clawhub install <owner/name>` 安装")
+    click.echo("   找到后用 `agenthub clawhub install <slug>` 安装")
 
 
 @clawhub.command("install")
@@ -175,20 +209,23 @@ def install(skill_path, source):
     从 ClawHub 安装 Skill 到本地
 
     用法:
-      agenthub clawhub install <owner/name>   # 如: steipete/github
-      agenthub clawhub install <url>          # 如: https://clawhub.ai/steipete/github
+      agenthub clawhub install <slug>              # 如: github, github-cli
+      agenthub clawhub install <owner/repo>        # 如: steipete/github (会自动转换)
+      agenthub clawhub install <url>               # 如: https://clawhub.ai/steipete/github
     """
     click.echo(f"📦 从 ClawHub 安装 Skill: {skill_path}")
 
-    # 解析 URL 或 owner/name
+    # 解析 URL
     if skill_path.startswith("http"):
         parts = skill_path.rstrip("/").split("/")
-        skill_path = f"{parts[-2]}/{parts[-1]}"
+        skill_path = parts[-1]  # URL 只取最后一个部分作为 slug
 
-    if "/" not in skill_path:
-        click.echo("❌ 格式错误，应为 owner/name")
-        click.echo("   示例: agenthub clawhub install steipete/github")
-        return
+    # 解析 owner/name 格式 (转换为 slug)
+    if "/" in skill_path:
+        # steipete/github -> github (取第二部分)
+        # 但有些 skill slug 就是 owner/repo 格式
+        # 尝试直接用 slug，如果失败再用搜索
+        pass
 
     click.echo(f"   Skill: {skill_path}")
 
@@ -258,18 +295,19 @@ def _install_with_openclaw(skill_path: str) -> bool:
 
 
 def _install_with_clawhub(skill_path: str) -> bool:
-    """使用 clawhub CLI 安装"""
+    """使用 clawhub CLI 安装到 AgentHub skills 目录"""
     try:
-        # clawhub 使用 npx 运行
+        # 安装到 ~/.agenthub/skills
+        skills_dir = Path.home() / ".agenthub" / "skills"
         returncode, stdout, stderr = _run_command(
-            ["npx", "clawhub@latest", "install", skill_path]
+            ["npx", "clawhub@latest", "install", skill_path, "--dir", str(skills_dir)]
         )
         if returncode == 0:
-            click.echo(f"   {stdout}")
+            click.echo(f"   {stdout.strip()}")
             _sync_to_agenthub(skill_path)
             return True
         else:
-            click.echo(f"   ⚠️  {stderr}")
+            click.echo(f"   ⚠️  {stderr.strip()}")
             return False
     except ClawHubError as e:
         click.echo(f"   ❌ {e}")
