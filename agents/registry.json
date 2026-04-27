@@ -1,0 +1,68 @@
+{
+  "version": "1.0.0",
+  "schema": "agent-card-v1",
+  "last_updated": "2026-04-27T17:30:00Z",
+  "description": "AgentHub Agent Registry - AI Agent 成员列表，包含身份与署名",
+  "agents": {
+    "main-agent": {
+      "id": "main-agent",
+      "signature": "[main]",
+      "display_name": "Main Agent",
+      "type": "router",
+      "first_seen": "2026-04-20T00:00:00Z",
+      "last_active": "2026-04-27T00:00:00Z",
+      "capabilities": ["routing", "coordination", "delegation"],
+      "platform": "opencode",
+      "status": "active",
+      "note": "主路由 Agent，负责分发任务到专业 Agent"
+    },
+    "dev-agent": {
+      "id": "dev-agent",
+      "signature": "[dev]",
+      "display_name": "Dev Agent",
+      "type": "specialist",
+      "first_seen": "2026-04-20T00:00:00Z",
+      "last_active": "2026-04-27T00:00:00Z",
+      "capabilities": ["coding", "fullstack", "android", "weapp", "web", "api"],
+      "platform": "opencode",
+      "status": "active",
+      "note": "开发专家，处理所有开发任务"
+    },
+    "life-agent": {
+      "id": "life-agent",
+      "signature": "[life]",
+      "display_name": "Life Agent",
+      "type": "specialist",
+      "first_seen": "2026-04-20T00:00:00Z",
+      "last_active": "2026-04-27T00:00:00Z",
+      "capabilities": ["schedule", "weather", "homework", "emotion", "resume"],
+      "platform": "opencode",
+      "status": "active",
+      "note": "生活服务，处理日程、课程、情感等"
+    },
+    "ops-agent": {
+      "id": "ops-agent",
+      "signature": "[ops]",
+      "display_name": "Ops Agent",
+      "type": "specialist",
+      "first_seen": "2026-04-20T00:00:00Z",
+      "last_active": "2026-04-27T00:00:00Z",
+      "capabilities": ["blog", "feishu", "wechat", "email", "docs", "ppt"],
+      "platform": "opencode",
+      "status": "active",
+      "note": "运营专家，处理内容发布和社交媒体"
+    },
+    "productivity-agent": {
+      "id": "productivity-agent",
+      "signature": "[productivity]",
+      "display_name": "Productivity Agent",
+      "type": "specialist",
+      "first_seen": "2026-04-20T00:00:00Z",
+      "last_active": "2026-04-27T00:00:00Z",
+      "capabilities": ["automation", "browser", "scripts", "humanizer"],
+      "platform": "opencode",
+      "status": "active",
+      "note": "效率专家，处理自动化和效率提升"
+    }
+  }
+}

@@ -1,5 +1,6 @@
 # AgentHub AI 使用指南
 
+> 版本: v2.0 | 更新: 2026-04-27
 > 本文档供 AI 助手阅读，了解如何使用 AgentHub 框架。
 
 ---
@@ -155,15 +156,80 @@ Skill 通过触发词激活，不要硬编码 Skill 逻辑。
 
 用户画像和记忆中的敏感信息不要外泄。
 
+## 🤖 Agent 注册与署名
+
+### 注册表
+
+所有 AI Agent 都在 `~/.agenthub/agents/registry.json` 注册：
+
+```json
+{
+  "agents": {
+    "dev-agent": {
+      "id": "dev-agent",
+      "signature": "[dev]",
+      "display_name": "Dev Agent",
+      "type": "specialist",
+      "capabilities": ["coding", "fullstack"],
+      "status": "active"
+    }
+  }
+}
+```
+
+### 署名格式
+
+所有 AI 输出必须带署名，格式为 `[agent-id]`：
+
+```
+[hermes] 已完成记忆系统更新。
+[dev] 开始处理开发任务...
+[life] 今日课程：无课
+```
+
+### 新 AI 注册流程
+
+1. 读取 `~/.agenthub/agents/registry.json`
+2. 检查自己是否已注册
+3. 未注册则添加自己的身份
+4. 每次会话更新 `last_active`
+
+详见 `~/.agenthub/agents/onboarding-protocol.md`
+
+---
+
 ## 📁 文件位置
 
 | 文件 | 路径 |
 |------|------|
 | 用户画像 | `~/.agenthub/profile/identity.yaml` |
 | Skills 注册表 | `~/.agenthub/registry.json` |
+| Agent 注册表 | `~/.agenthub/agents/registry.json` |
 | 记忆存储 | `~/.agenthub/memory/` |
+| Agent 模板 | `~/.agenthub/agents/templates/proactive/` |
 | 配置文件 | `~/.agenthub/config.yaml` |
 
 ---
 
-*本文档由 AgentHub 自动生成*
+## 📚 Agent 模板（Proactive Agent 系列）
+
+AgentHub 提供源自 **proactive-agent (Hal Labs)** 的专业模板，位于 `agents/templates/proactive/`：
+
+| 模板 | 说明 |
+|------|------|
+| `SOUL.md` | Agent 身份与原则定义 |
+| `AGENTS.md` | Agent 操作规则与工作流 |
+| `HEARTBEAT.md` | 定期自检清单（安全/自我修复/主动） |
+| `USER.md` | 用户信息模板 |
+| `MEMORY.md` | 长期记忆模板 |
+| `ONBOARDING.md` | 新用户初始化向导 |
+| `TOOLS.md` | 工具配置与笔记 |
+
+这些模板帮助 Agent 实现：
+- **主动** — 不等待指令，主动创造价值
+- **持久** — 通过记忆系统跨会话学习
+- **安全** — 定期自检，防止prompt注入
+
+---
+
+*本文档由 AgentHub 自动生成，v2.0 新增 Agent 注册与模板支持。*

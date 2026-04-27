@@ -1,6 +1,6 @@
-# 记忆系统设计 v1.0
+# 记忆系统设计 v1.1
 
-> 版本: v1.0 | 更新: 2026-04-27
+> 版本: v1.1 | 更新: 2026-04-27
 > **参考设计**: Hermes Agent 记忆系统
 
 ## 概述
@@ -8,6 +8,62 @@
 AgentHub 记忆系统为 AI 工具提供持久化、多层级的记忆能力，让 AI 能够跨越会话持续学习和记忆用户偏好。
 
 > 本设计**参考 Hermes Agent 的记忆架构**，结合 AgentHub 的跨平台目标进行优化。
+
+---
+
+## 🤖 Agent 注册与署名
+
+AgentHub 在 v1.1 中新增了 **Agent 注册与署名系统**，让多个 AI 可以协同工作并相互识别。
+
+### 目录结构
+
+```
+memory/
+├── agents/                    # ★ v1.1 新增：Agent 注册表
+│   ├── registry.json          # 成员列表（所有已注册 AI）
+│   ├── registry-meta.json     # 元数据
+│   ├── onboarding-protocol.md # 新 AI 初始化协议
+│   └── templates/
+│       └── agent-card-template.json  # 身份卡模板
+├── hot/                      # 短期记忆（会话级）
+├── cold/                      # 中期记忆（7-30天）
+├── archive/                   # 归档记忆
+├── memories/                 # 核心记忆
+│   ├── MEMORY.md            # 重要事实（用 § 分隔）
+│   └── USER.md              # 用户画像简要
+└── retrieval/                # 检索引擎
+```
+
+### 署名格式
+
+所有 AI 输出必须带署名，格式为 `[agent-id]`：
+
+```
+[hermes] 已完成记忆系统更新。
+[dev] 开始处理开发任务...
+[life] 今日课程：无课
+```
+
+### 注册流程
+
+1. 读取 `memory/agents/registry.json`
+2. 检查自己是否已注册
+3. 未注册则添加自己的身份卡
+4. 每次会话更新 `last_active`
+
+### Agent 模板
+
+源自 **proactive-agent (Hal Labs)** 的专业模板：
+
+| 模板 | 说明 |
+|------|------|
+| `SOUL.md` | Agent 身份与原则定义 |
+| `AGENTS.md` | Agent 操作规则与工作流 |
+| `HEARTBEAT.md` | 定期自检清单 |
+| `USER.md` | 用户信息模板 |
+| `MEMORY.md` | 长期记忆模板 |
+
+详见 `~/.agenthub/agents/onboarding-protocol.md`
 
 ---
 
