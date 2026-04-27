@@ -11,7 +11,11 @@
       "type": "router",
       "first_seen": "2026-04-20T00:00:00Z",
       "last_active": "2026-04-27T00:00:00Z",
-      "capabilities": ["routing", "coordination", "delegation"],
+      "capabilities": [
+        "routing",
+        "coordination",
+        "delegation"
+      ],
       "platform": "opencode",
       "status": "active",
       "note": "主路由 Agent，负责分发任务到专业 Agent"
@@ -23,7 +27,14 @@
       "type": "specialist",
       "first_seen": "2026-04-20T00:00:00Z",
       "last_active": "2026-04-27T00:00:00Z",
-      "capabilities": ["coding", "fullstack", "android", "weapp", "web", "api"],
+      "capabilities": [
+        "coding",
+        "fullstack",
+        "android",
+        "weapp",
+        "web",
+        "api"
+      ],
       "platform": "opencode",
       "status": "active",
       "note": "开发专家，处理所有开发任务"
@@ -35,7 +46,13 @@
       "type": "specialist",
       "first_seen": "2026-04-20T00:00:00Z",
       "last_active": "2026-04-27T00:00:00Z",
-      "capabilities": ["schedule", "weather", "homework", "emotion", "resume"],
+      "capabilities": [
+        "schedule",
+        "weather",
+        "homework",
+        "emotion",
+        "resume"
+      ],
       "platform": "opencode",
       "status": "active",
       "note": "生活服务，处理日程、课程、情感等"
@@ -47,7 +64,14 @@
       "type": "specialist",
       "first_seen": "2026-04-20T00:00:00Z",
       "last_active": "2026-04-27T00:00:00Z",
-      "capabilities": ["blog", "feishu", "wechat", "email", "docs", "ppt"],
+      "capabilities": [
+        "blog",
+        "feishu",
+        "wechat",
+        "email",
+        "docs",
+        "ppt"
+      ],
       "platform": "opencode",
       "status": "active",
       "note": "运营专家，处理内容发布和社交媒体"
@@ -59,10 +83,31 @@
       "type": "specialist",
       "first_seen": "2026-04-20T00:00:00Z",
       "last_active": "2026-04-27T00:00:00Z",
-      "capabilities": ["automation", "browser", "scripts", "humanizer"],
+      "capabilities": [
+        "automation",
+        "browser",
+        "scripts",
+        "humanizer"
+      ],
       "platform": "opencode",
       "status": "active",
       "note": "效率专家，处理自动化和效率提升"
+    },
+    "doubao": {
+      "id": "doubao",
+      "signature": "[doubao]",
+      "display_name": "豆包",
+      "type": "general",
+      "platform": "doubao",
+      "capabilities": [
+        "video_analysis",
+        "agent_creation",
+        "knowledge_extraction"
+      ],
+      "status": "active",
+      "first_seen": "2026-04-27T19:45:00Z",
+      "last_active": "2026-04-27T19:45:00Z",
+      "notes": "豆包视频分析 + Agent 制作专家"
     }
   }
 }
