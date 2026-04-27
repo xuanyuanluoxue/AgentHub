@@ -30,6 +30,26 @@ INSTALL_DIR="${HOME}/.agenthub"
 BACKUP_DIR="${HOME}/.agenthub.backup.$(date +%Y%m%d%H%M%S)"
 SPINNER_PID=""
 SPINNER_CHARS="/-\|"
+SKIP_PROMPTS=false
+
+# 解析参数
+while [[ $# -gt 0 ]]; do
+    case $1 in
+        -y|--yes|--non-interactive)
+            SKIP_PROMPTS=true
+            shift
+            ;;
+        -h|--help)
+            echo "用法: $0 [-y|--yes] [安装目录]"
+            echo "  -y, --yes          非交互模式，自动确认所有提示"
+            exit 0
+            ;;
+        *)
+            INSTALL_DIR="$1"
+            shift
+            ;;
+    esac
+done
 
 # ============================================
 # 日志函数
@@ -149,8 +169,8 @@ backup_existing() {
         print_divider
         log_warn "发现已存在的 AgentHub 配置"
 
-        # 非交互模式自动跳过备份
-        if [ ! -t 0 ]; then
+        # 非交互模式或 --yes 参数自动跳过备份
+        if [ "$SKIP_PROMPTS" = true ] || [ ! -t 0 ]; then
             log_info "非交互模式，自动跳过备份"
             rm -rf "${INSTALL_DIR}"
             echo ""
