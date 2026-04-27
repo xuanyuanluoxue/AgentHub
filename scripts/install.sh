@@ -56,7 +56,6 @@ detect_os() {
 
     case "$(uname -s)" in
         Linux*)
-            # 检查是否为 WSL
             if grep -qiE "(microsoft|wsl)" /proc/version 2>/dev/null; then
                 os_name="WSL (Windows Subsystem for Linux)"
                 os_type="linux"
@@ -94,6 +93,42 @@ is_installed() {
 }
 
 # ============================================
+# 下载并执行子脚本
+# ============================================
+download_and_run() {
+    local url="$1"
+    local name="$2"
+
+    echo -e "${DIM}正在下载 ${name}...${NC}"
+
+    local content
+    content=$(curl -fsSL --connect-timeout 15 --max-time 60 "$url" 2>&1) || {
+        local err=$?
+        echo ""
+        log_error "下载失败 (错误码: $err)"
+        echo ""
+        echo -e "${YELLOW}可能的原因:${NC}"
+        echo "  1. 网络连接不稳定"
+        echo "  2. DNS 解析失败"
+        echo "  3. 该网络环境限制了对 GitHub 的访问"
+        echo ""
+        echo -e "${CYAN}解决方案:${NC}"
+        echo "  1. 稍后重试"
+        echo "  2. 切换到手机热点或其他网络"
+        echo "  3. 使用 VPN"
+        echo "  4. 直接克隆仓库: git clone https://github.com/xuanyuanluoxue/AgentHub.git ~/.agenthub"
+        echo ""
+        echo -e "${DIM}帮助文档: https://github.com/xuanyuanluoxue/AgentHub${NC}"
+        echo ""
+        exit 1
+    }
+
+    echo -e "${GREEN}下载成功${NC}"
+    echo ""
+    echo "$content" | bash -s -- "$@"
+}
+
+# ============================================
 # 主流程
 # ============================================
 main() {
@@ -111,7 +146,6 @@ main() {
         echo -e "${YELLOW}⚠  检测到已安装 AgentHub${NC}"
         echo ""
 
-        # 尝试使用 /dev/tty 询问
         if [ -e /dev/tty ]; then
             echo -n "  是否重新安装? [y/N]: "
             read -n 1 -r < /dev/tty
@@ -137,8 +171,9 @@ main() {
         linux)
             log_info "正在启动 Linux 安装程序..."
             echo ""
-            # 下载并执行 Linux 安装脚本
-            curl -fsSL "https://raw.githubusercontent.com/xuanyuanluoxue/AgentHub/main/scripts/linux/install.sh" | bash
+            download_and_run \
+                "https://raw.githubusercontent.com/xuanyuanluoxue/AgentHub/main/scripts/linux/install.sh" \
+                "Linux 安装脚本"
             ;;
         windows)
             log_info "正在启动 Windows 安装程序..."
@@ -148,7 +183,9 @@ main() {
         macos)
             log_info "正在启动 macOS 安装程序..."
             echo ""
-            curl -fsSL "https://raw.githubusercontent.com/xuanyuanluoxue/AgentHub/main/scripts/macos/install.sh" | bash
+            download_and_run \
+                "https://raw.githubusercontent.com/xuanyuanluoxue/AgentHub/main/scripts/macos/install.sh" \
+                "macOS 安装脚本"
             ;;
         *)
             log_error "不支持的操作系统: $os_name"
