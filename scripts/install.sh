@@ -16,7 +16,11 @@ RED='\033[0;31m'
 GREEN='\033[0;32m'
 YELLOW='\033[1;33m'
 BLUE='\033[0;34m'
-NC='\033[0m' # No Color
+CYAN='\033[0;36m'
+MAGENTA='\033[0;35m'
+BOLD='\033[1m'
+DIM='\033[2m'
+NC='\033[0m'
 
 # ============================================
 # 配置
@@ -24,103 +28,292 @@ NC='\033[0m' # No Color
 REPO_URL="https://github.com/xuanyuanluoxue/AgentHub.git"
 INSTALL_DIR="${HOME}/.agenthub"
 BACKUP_DIR="${HOME}/.agenthub.backup.$(date +%Y%m%d%H%M%S)"
+SPINNER_PID=""
+SPINNER_CHARS="/-\|"
 
 # ============================================
-# 函数
+# 日志函数
 # ============================================
-log_info() { echo -e "${BLUE}ℹ️  $1${NC}"; }
-log_success() { echo -e "${GREEN}✅ $1${NC}"; }
-log_warn() { echo -e "${YELLOW}⚠️  $1${NC}"; }
-log_error() { echo -e "${RED}❌ $1${NC}"; }
+log_info() { echo -e "${BLUE}➜${NC} $1"; }
+log_success() { echo -e "${GREEN}✓${NC} $1"; }
+log_warn() { echo -e "${YELLOW}⚠${NC} $1"; }
+log_error() { echo -e "${RED}✗${NC} $1"; }
+log_step() { echo -e "${CYAN}▸${NC} $1"; }
+log_dim() { echo -e "${DIM}$1${NC}"; }
 
+# ============================================
+# 进度动画
+# ============================================
+start_spinner() {
+    local message="$1"
+    echo -ne "${DIM}${message} ${SPINNER_CHARS:0:1}${NC}"
+    SPINNER_PID=$!
+    (
+        local i=1
+        while true; do
+            sleep 0.15
+            echo -ne "\b${SPINNER_CHARS:$((i++ % 4)):1}"
+        done
+    ) &
+    SPINNER_PID=$!
+}
+
+stop_spinner() {
+    if [ -n "$SPINNER_PID" ]; then
+        kill $SPINNER_PID 2>/dev/null || true
+        wait $SPINNER_PID 2>/dev/null || true
+        echo -e "\b${GREEN}✓${NC}"
+        SPINNER_PID=""
+    fi
+}
+
+# ============================================
+# 分隔线
+# ============================================
+print_divider() {
+    echo -e "${DIM}$(printf '─%.0s' $(seq 1 50))${NC}"
+}
+
+# ============================================
+# Banner
+# ============================================
 print_banner() {
     echo ""
-    echo -e "${GREEN}╔═══════════════════════════════════════════╗${NC}"
-    echo -e "${GREEN}║         AgentHub 安装程序                ║${NC}"
-    echo -e "${GREEN}║   统一 AI 工具的 Skill · Agent · 画像    ║${NC}"
-    echo -e "${GREEN}╚═══════════════════════════════════════════╝${NC}"
+    echo -e "${BOLD}${MAGENTA}╔══════════════════════════════════════════════════════════╗${NC}"
+    echo -e "${BOLD}${MAGENTA}║${NC}          ${BOLD}${GREEN}██╗   ██╗ ██████╗ ██████╗ ██████╗ ██╗   ██╗${NC}          ${BOLD}${MAGENTA}║${NC}"
+    echo -e "${BOLD}${MAGENTA}║${NC}          ${BOLD}${GREEN}██║   ██║██╔═══██╗██╔══██╗██╔══██╗╚██╗ ██╔╝${NC}          ${BOLD}${MAGENTA}║${NC}"
+    echo -e "${BOLD}${MAGENTA}║${NC}          ${BOLD}${GREEN}██║   ██║██║   ██║██████╔╝██████╔╝ ╚████╔╝ ${NC}          ${BOLD}${MAGENTA}║${NC}"
+    echo -e "${BOLD}${MAGENTA}║${NC}          ${BOLD}${GREEN}╚██╗ ██╔╝██║   ██║██╔══██╗██╔══██╗  ╚██╔╝  ${NC}          ${BOLD}${MAGENTA}║${NC}"
+    echo -e "${BOLD}${MAGENTA}║${NC}          ${BOLD}${GREEN} ╚████╔╝ ╚██████╔╝██████╔╝██████╔╝   ██║   ${NC}          ${BOLD}${MAGENTA}║${NC}"
+    echo -e "${BOLD}${MAGENTA}║${NC}          ${BOLD}${GREEN}  ╚═══╝   ╚═════╝ ╚═════╝ ╚═════╝    ╚═╝   ${NC}          ${BOLD}${MAGENTA}║${NC}"
+    echo -e "${BOLD}${MAGENTA}║${NC}                     ${BOLD}${CYAN}统一 AI 工具四大共享生态${NC}                    ${BOLD}${MAGENTA}║${NC}"
+    echo -e "${BOLD}${MAGENTA}║${NC}                     ${DIM}Skill · Agent · 画像 · 记忆系统${NC}                     ${BOLD}${MAGENTA}║${NC}"
+    echo -e "${BOLD}${MAGENTA}╚══════════════════════════════════════════════════════════╝${NC}"
     echo ""
 }
 
+# ============================================
+# 检查依赖
+# ============================================
 check_dependencies() {
-    log_info "检查依赖..."
+    echo -e "${BOLD}▸ 检查系统依赖${NC}"
+    print_divider
 
-    if ! command -v git &> /dev/null; then
-        log_error "Git 未安装，请先安装 Git"
-        echo "   Ubuntu/Debian: sudo apt install git"
-        echo "   macOS: brew install git"
+    local deps=("git" "python3")
+    local all_ok=true
+
+    for dep in "${deps[@]}"; do
+        if command -v $dep &> /dev/null; then
+            local version=$(eval "$dep --version 2>/dev/null" | head -1 | cut -d' ' -f1-2 | tr -d ' ')
+            echo -e "  ${GREEN}✓${NC} ${CYAN}${dep}${NC} ${DIM}(${version})${NC}"
+        else
+            echo -e "  ${RED}✗${NC} ${CYAN}${dep}${NC} ${DIM}(未找到)${NC}"
+            all_ok=false
+        fi
+    done
+
+    if [ "$all_ok" = false ]; then
+        echo ""
+        log_error "缺少必要的系统依赖"
+        echo ""
+        echo -e "${DIM}请先安装缺失的依赖:${NC}"
+        echo -e "  Ubuntu/Debian: ${GREEN}sudo apt install git python3 python3-pip${NC}"
+        echo -e "  macOS:         ${GREEN}brew install git python${NC}"
+        echo ""
         exit 1
     fi
-    log_success "Git 已安装"
 
-    if ! command -v python3 &> /dev/null; then
-        log_error "Python3 未安装，请先安装 Python >= 3.10"
-        echo "   Ubuntu/Debian: sudo apt install python3 python3-pip"
-        echo "   macOS: brew install python"
+    # 检查 Python 版本
+    PYTHON_VERSION=$(python3 --version 2>&1 | cut -d' ' -f2)
+    PYTHON_MAJOR=$(echo $PYTHON_VERSION | cut -d'.' -f1)
+    PYTHON_MINOR=$(echo $PYTHON_VERSION | cut -d'.' -f2)
+
+    if [ "$PYTHON_MAJOR" -lt 3 ] || ([ "$PYTHON_MAJOR" -eq 3 ] && [ "$PYTHON_MINOR" -lt 10 ]); then
+        echo ""
+        log_error "Python 版本过低: $PYTHON_VERSION (需要 >= 3.10)"
+        echo ""
         exit 1
     fi
-    PYTHON_VERSION=$(python3 --version | cut -d' ' -f2 | cut -d'.' -f1,2)
-    log_success "Python3 已安装 (${PYTHON_VERSION})"
+
+    echo ""
+    log_success "所有依赖检查通过"
+    echo ""
 }
 
+# ============================================
+# 备份现有配置
+# ============================================
 backup_existing() {
     if [ -d "${INSTALL_DIR}" ]; then
+        echo -e "${BOLD}▸ 备份现有配置${NC}"
+        print_divider
         log_warn "发现已存在的 AgentHub 配置"
-        read -p "是否备份现有配置? (y/N): " -n 1 -r
-        echo
+        echo -n "  是否备份? ${CYAN}[y/N]${NC}: "
+        read -n 1 -r
+        echo ""
+
         if [[ $REPLY =~ ^[Yy]$ ]]; then
-            log_info "备份现有配置到 ${BACKUP_DIR}"
-            mv "${INSTALL_DIR}" "${BACKUP_DIR}"
-            log_success "备份完成"
+            log_info "正在备份到 ${BACKUP_DIR}..."
+            if mv "${INSTALL_DIR}" "${BACKUP_DIR}" 2>/dev/null; then
+                log_success "备份完成"
+            else
+                log_error "备份失败"
+                exit 1
+            fi
         else
             log_warn "跳过备份，现有配置将被覆盖"
+            rm -rf "${INSTALL_DIR}"
         fi
+        echo ""
     fi
 }
 
+# ============================================
+# 克隆仓库
+# ============================================
+clone_repo() {
+    echo -e "${BOLD}▸ 下载 AgentHub${NC}"
+    print_divider
+
+    if [ -d "${INSTALL_DIR}" ] && [ -f "${INSTALL_DIR}/pyproject.toml" ]; then
+        log_info "发现已安装的 AgentHub，跳过下载"
+        echo -e "  ${DIM}目录: ${INSTALL_DIR}${NC}"
+        echo ""
+        return 0
+    fi
+
+    log_info "正在克隆仓库..."
+    echo -e "  ${DIM}来源: ${REPO_URL}${NC}"
+    echo -e "  ${DIM}目标: ${INSTALL_DIR}${NC}"
+    echo ""
+
+    if git clone --depth 1 "${REPO_URL}" "${INSTALL_DIR}" 2>&1; then
+        echo ""
+        log_success "仓库克隆完成"
+        echo ""
+    else
+        echo ""
+        log_error "克隆失败，请检查网络连接"
+        echo ""
+        exit 1
+    fi
+}
+
+# ============================================
+# 安装 Python 包
+# ============================================
 install_package() {
-    log_info "安装 AgentHub Python 包..."
+    echo -e "${BOLD}▸ 安装 Python 包${NC}"
+    print_divider
 
     cd "${INSTALL_DIR}"
 
     if [ ! -f "pyproject.toml" ]; then
-        log_error "pyproject.toml 不存在，请确认安装目录正确"
+        log_error "pyproject.toml 不存在"
         exit 1
     fi
 
-    pip install -e . --quiet
-    log_success "Python 包安装完成"
-}
+    log_info "正在安装 AgentHub CLI..."
 
-run_init() {
-    log_info "初始化 AgentHub 配置..."
-
-    if command -v agenthub &> /dev/null; then
-        read -p "是否初始化配置? (Y/n): " -n 1 -r
-        echo
-        if [[ ! $REPLY =~ ^[Nn]$ ]]; then
-            agenthub init --template
-            log_success "配置初始化完成"
-        fi
+    if pip install -e . 2>&1; then
+        echo ""
+        log_success "Python 包安装完成"
     else
-        log_warn "agenthub 命令未安装到 PATH，请重新登录或运行: source ~/.bashrc"
+        echo ""
+        log_error "pip install 失败，尝试使用 sudo..."
+        if sudo pip install -e . 2>&1; then
+            echo ""
+            log_success "Python 包安装完成 (sudo)"
+        else
+            echo ""
+            log_error "安装失败，请手动运行: pip install -e ."
+            exit 1
+        fi
     fi
+    echo ""
+
+    # 验证安装
+    if command -v agenthub &> /dev/null; then
+        AGENTHUB_VERSION=$(agenthub --version 2>/dev/null || echo "unknown")
+        echo -e "  ${GREEN}✓${NC} ${CYAN}agenthub${NC} ${DIM}(v${AGENTHUB_VERSION})${NC}"
+    else
+        echo -e "  ${YELLOW}⚠${NC} ${CYAN}agenthub${NC} ${DIM}(未添加到 PATH)${NC}"
+    fi
+    echo ""
 }
 
-print_next_steps() {
+# ============================================
+# 初始化配置
+# ============================================
+init_config() {
+    echo -e "${BOLD}▸ 初始化配置${NC}"
+    print_divider
+
+    # 创建必要的目录
+    mkdir -p "${INSTALL_DIR}/skills"
+    mkdir -p "${INSTALL_DIR}/agents"
+    mkdir -p "${INSTALL_DIR}/profile"
+    mkdir -p "${INSTALL_DIR}/apps"
+
+    # 检查是否已有配置
+    if [ -f "${INSTALL_DIR}/profile/identity.yaml" ]; then
+        log_info "配置文件已存在，跳过初始化"
+        echo ""
+        return 0
+    fi
+
+    log_info "创建默认配置文件..."
+
+    # 创建默认 identity.yaml
+    cat > "${INSTALL_DIR}/profile/identity.yaml" << 'EOF'
+name: Your Name
+bio: AI enthusiast and developer
+contact:
+  email: your@email.com
+  github: https://github.com/your-username
+preferences:
+  language: zh-CN
+  theme: auto
+EOF
+
+    # 创建 registry.json
+    echo '{"skills": [], "agents": [], "version": "1.0"}' > "${INSTALL_DIR}/registry.json"
+
+    log_success "配置文件创建完成"
     echo ""
-    echo -e "${GREEN}╔═══════════════════════════════════════════╗${NC}"
-    echo -e "${GREEN}║            安装完成！                     ║${NC}"
-    echo -e "${GREEN}╚═══════════════════════════════════════════╝${NC}"
+}
+
+# ============================================
+# 完成
+# ============================================
+print_complete() {
     echo ""
-    echo "下一步:"
-    echo "  1. 编辑 ~/.agenthub/profile/identity.yaml 填入你的信息"
-    echo "  2. 运行 ${GREEN}agenthub skill list${NC} 查看 Skills"
-    echo "  3. 运行 ${GREEN}agenthub agent list${NC} 查看 Agents"
+    echo -e "${BOLD}${GREEN}╔══════════════════════════════════════════════════════════╗${NC}"
+    echo -e "${BOLD}${GREEN}║${NC}                    ${BOLD}安装完成！${NC}                          ${BOLD}${GREEN}║${NC}"
+    echo -e "${BOLD}${GREEN}╚══════════════════════════════════════════════════════════╝${NC}"
     echo ""
-    echo "帮助:"
-    echo "  agenthub --help           # 查看帮助"
-    echo "  agenthub init --help     # 查看初始化选项"
+    echo -e "${BOLD}▸ 下一步${NC}"
+    print_divider
+    echo -e "  ${CYAN}1.${NC} 编辑配置文件"
+    echo -e "     ${DIM}vim ~/.agenthub/profile/identity.yaml${NC}"
+    echo ""
+    echo -e "  ${CYAN}2.${NC} 尝试验证安装"
+    echo -e "     ${DIM}agenthub status${NC}"
+    echo ""
+    echo -e "  ${CYAN}3.${NC} 搜索 ClawHub Skills"
+    echo -e "     ${DIM}agenthub clawhub search github${NC}"
+    echo ""
+
+    # 检查 PATH
+    if command -v agenthub &> /dev/null; then
+        echo -e "  ${GREEN}✓${NC} ${CYAN}agenthub${NC} 已添加到 PATH"
+    else
+        echo -e "  ${YELLOW}⚠${NC} agenthub 未找到，请重新打开终端或执行:"
+        echo -e "     ${GREEN}source ~/.bashrc${NC}"
+    fi
+
+    echo ""
+    echo -e "${DIM}帮助文档: https://github.com/xuanyuanluoxue/AgentHub${NC}"
     echo ""
 }
 
@@ -129,23 +322,12 @@ print_next_steps() {
 # ============================================
 main() {
     print_banner
-
     check_dependencies
-
-    if [ -d "${INSTALL_DIR}" ] && [ -f "${INSTALL_DIR}/pyproject.toml" ]; then
-        log_info "发现已安装的 AgentHub，跳过下载"
-        BACKUP_DIR="${INSTALL_DIR}"
-    else
-        backup_existing
-
-        log_info "克隆 AgentHub 仓库到 ${INSTALL_DIR}..."
-        git clone --depth 1 "${REPO_URL}" "${INSTALL_DIR}"
-        log_success "仓库克隆完成"
-    fi
-
+    backup_existing
+    clone_repo
     install_package
-    run_init
-    print_next_steps
+    init_config
+    print_complete
 }
 
 # 检查是否提供了安装目录参数
