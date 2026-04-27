@@ -11,17 +11,20 @@
 set -e
 
 # ============================================
-# 检测管道输入
+# 检测管道/终端输入
 # ============================================
 is_piped() {
+    # 管道: [ -p /dev/stdin ] 为真
     if [ -p /dev/stdin ] || [ -p /dev/fd/0 ]; then
         return 0
     fi
-    if [ -f /dev/stdin ]; then
-        local bytes=$(cat /dev/stdin 2>/dev/null | wc -c)
-        if [ "$bytes" -gt 0 ]; then
-            return 0
-        fi
+    return 1
+}
+
+is_interactive() {
+    # 终端: stdin 是终端设备
+    if [ -t 0 ]; then
+        return 0
     fi
     return 1
 }
@@ -46,7 +49,7 @@ REPO_URL="https://github.com/xuanyuanluoxue/AgentHub.git"
 INSTALL_DIR="${HOME}/.agenthub"
 BACKUP_DIR="${HOME}/.agenthub.backup.$(date +%Y%m%d%H%M%S)"
 FORCE_REINSTALL=false
-INTERACTIVE=true
+INTERACTIVE=false
 
 # 解析参数
 while [[ $# -gt 0 ]]; do
@@ -56,7 +59,6 @@ while [[ $# -gt 0 ]]; do
             shift
             ;;
         -y|--yes)
-            INTERACTIVE=false
             FORCE_REINSTALL=true
             shift
             ;;
@@ -73,9 +75,11 @@ while [[ $# -gt 0 ]]; do
     esac
 done
 
-# 管道输入时，非交互但不强制的
-if is_piped; then
-    INTERACTIVE=false
+# 如果不是管道输入，检测是否为交互式终端
+if ! is_piped; then
+    if is_interactive; then
+        INTERACTIVE=true
+    fi
 fi
 
 # ============================================
@@ -115,10 +119,16 @@ confirm() {
     local message="$1"
     local default="${2:-N}"
 
+    # 如果不是交互式终端，且没有强制参数，使用默认值
     if [ "$INTERACTIVE" = false ]; then
-        return 1  # 非交互模式，返回 false（不确认）
+        if [ "$default" = "Y" ]; then
+            return 0
+        else
+            return 1
+        fi
     fi
 
+    # 交互模式，显示提示
     if [ "$default" = "Y" ]; then
         echo -n "$message [Y/n]: "
     else
