@@ -214,30 +214,81 @@ install_package() {
     fi
 
     log_info "正在安装 AgentHub CLI..."
+    echo ""
 
-    if pip install -e . 2>&1; then
+    local install_ok=false
+    local install_method=""
+
+    # 方法 1: pip install --user (推荐，用户级安装)
+    log_dim "  尝试方法 1: pip install --user..."
+    if pip install --user -e . 2>&1; then
+        install_ok=true
+        install_method="--user"
+    fi
+
+    # 方法 2: pip install --break-system-packages
+    if [ "$install_ok" = false ]; then
         echo ""
-        log_success "Python 包安装完成"
-    else
-        echo ""
-        log_error "pip install 失败，尝试使用 sudo..."
-        if sudo pip install -e . 2>&1; then
-            echo ""
-            log_success "Python 包安装完成 (sudo)"
-        else
-            echo ""
-            log_error "安装失败，请手动运行: pip install -e ."
-            exit 1
+        log_dim "  尝试方法 2: pip install --break-system-packages..."
+        if pip install --break-system-packages -e . 2>&1; then
+            install_ok=true
+            install_method="--break-system-packages"
         fi
     fi
+
+    # 方法 3: python3 -m pip install --user
+    if [ "$install_ok" = false ]; then
+        echo ""
+        log_dim "  尝试方法 3: python3 -m pip install --user..."
+        if python3 -m pip install --user -e . 2>&1; then
+            install_ok=true
+            install_method="python3 -m pip --user"
+        fi
+    fi
+
+    # 方法 4: sudo python3 -m pip
+    if [ "$install_ok" = false ]; then
+        echo ""
+        log_dim "  尝试方法 4: sudo python3 -m pip..."
+        if sudo python3 -m pip install -e . 2>&1; then
+            install_ok=true
+            install_method="sudo python3 -m pip"
+        fi
+    fi
+
     echo ""
+
+    if [ "$install_ok" = true ]; then
+        log_success "Python 包安装完成 ($install_method)"
+    else
+        log_error "所有安装方法都失败了"
+        echo ""
+        log_info "请手动安装:"
+        echo -e "  ${CYAN}cd ~/.agenthub${NC}"
+        echo -e "  ${CYAN}pip install --user -e .${NC}"
+        echo ""
+        log_info "或者创建虚拟环境:"
+        echo -e "  ${CYAN}python3 -m venv ~/.agenthub/.venv${NC}"
+        echo -e "  ${CYAN}~/.agenthub/.venv/bin/pip install -e .${NC}"
+        echo ""
+        exit 1
+    fi
+    echo ""
+
+    # 确保用户 bin 目录在 PATH 中
+    local user_bin="${HOME}/.local/bin"
+    if [ -d "$user_bin" ] && [[ ":$PATH:" != *":$user_bin:"* ]]; then
+        echo -e "  ${YELLOW}⚠${NC} 建议将 ${CYAN}$user_bin${NC} 添加到 PATH"
+        echo -e "  ${DIM}echo 'export PATH=\"\$HOME/.local/bin:\$PATH\"' >> ~/.bashrc${NC}"
+        echo ""
+    fi
 
     # 验证安装
     if command -v agenthub &> /dev/null; then
         AGENTHUB_VERSION=$(agenthub --version 2>/dev/null || echo "unknown")
         echo -e "  ${GREEN}✓${NC} ${CYAN}agenthub${NC} ${DIM}(v${AGENTHUB_VERSION})${NC}"
     else
-        echo -e "  ${YELLOW}⚠${NC} ${CYAN}agenthub${NC} ${DIM}(未添加到 PATH)${NC}"
+        echo -e "  ${YELLOW}⚠${NC} ${CYAN}agenthub${NC} ${DIM}(未添加到 PATH，请重新打开终端)${NC}"
     fi
     echo ""
 }
