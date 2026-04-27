@@ -2,7 +2,7 @@
 AgentHub 一键安装脚本 - Windows PowerShell
 
 用法:
-  irm https://raw.githubusercontent.com/your-org/agenthub/main/scripts/install.ps1 | iex
+  irm https://raw.githubusercontent.com/xuanyuanluoxue/AgentHub/main/scripts/install.ps1 | iex
   或
   .\install.ps1
 #>
@@ -79,7 +79,7 @@ if (Test-Path $InstallDir) {
 # ============================================
 # 克隆仓库
 # ============================================
-$repoUrl = "https://github.com/your-org/agenthub.git"
+$repoUrl = "https://github.com/xuanyuanluoxue/AgentHub.git"
 
 if (-not (Test-Path $InstallDir)) {
     Write-Info "克隆 AgentHub 仓库到 $InstallDir..."

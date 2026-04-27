@@ -2,7 +2,7 @@
 # AgentHub 一键安装脚本 - Linux/macOS/WSL
 #
 # 用法:
-#   curl -fsSL https://raw.githubusercontent.com/your-org/agenthub/main/scripts/install.sh | bash
+#   curl -fsSL https://raw.githubusercontent.com/xuanyuanluoxue/AgentHub/main/scripts/install.sh | bash
 #   或
 #   bash install.sh
 #
@@ -21,7 +21,7 @@ NC='\033[0m' # No Color
 # ============================================
 # 配置
 # ============================================
-REPO_URL="https://github.com/your-org/agenthub.git"
+REPO_URL="https://github.com/xuanyuanluoxue/AgentHub.git"
 INSTALL_DIR="${HOME}/.agenthub"
 BACKUP_DIR="${HOME}/.agenthub.backup.$(date +%Y%m%d%H%M%S)"
 

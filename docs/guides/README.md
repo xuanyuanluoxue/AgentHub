@@ -2,8 +2,8 @@
 
 > 图形化管理和部署 AI 工具的中央控制中心
 
-[![Stars](https://img.shields.io/github/stars/your-org/agenthub)](https://github.com/your-org/agenthub/stargazers)
-[![License](https://img.shields.io/github/license/your-org/agenthub)](LICENSE)
+[![Stars](https://img.shields.io/github/stars/xuanyuanluoxue/AgentHub)](https://github.com/xuanyuanluoxue/AgentHub/stargazers)
+[![License](https://img.shields.io/github/license/xuanyuanluoxue/AgentHub)](LICENSE)
 
 ## 🎯 这是什么？
 

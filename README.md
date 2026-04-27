@@ -148,19 +148,19 @@ memory/
 
 **Windows (PowerShell):**
 ```powershell
-irm https://raw.githubusercontent.com/your-org/agenthub/main/scripts/install.ps1 | iex
+irm https://raw.githubusercontent.com/xuanyuanluoxue/AgentHub/main/scripts/install.ps1 | iex
 ```
 
 **Linux / macOS / WSL:**
 ```bash
-curl -fsSL https://raw.githubusercontent.com/your-org/agenthub/main/scripts/install.sh | bash
+curl -fsSL https://raw.githubusercontent.com/xuanyuanluoxue/AgentHub/main/scripts/install.sh | bash
 ```
 
 ### 手动安装
 
 ```bash
 # 1. 克隆仓库
-git clone https://github.com/your-org/agenthub.git ~/.agenthub
+git clone https://github.com/xuanyuanluoxue/AgentHub.git ~/.agenthub
 
 # 2. 安装 Python 包
 cd ~/.agenthub

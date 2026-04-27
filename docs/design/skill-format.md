@@ -243,8 +243,8 @@ tools:
   - git
 platform: all
 license: MIT
-homepage: https://github.com/your-org/agenthub
-source: https://github.com/your-org/agenthub
+homepage: https://github.com/xuanyuanluoxue/AgentHub
+source: https://github.com/xuanyuanluoxue/AgentHub
 ---
 
 # GitHub PR Manager
