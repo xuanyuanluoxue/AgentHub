@@ -1,0 +1,14 @@
+{
+  "version": "1.0.0",
+  "created_at": "2026-04-26T00:00:00Z",
+  "last_updated": "2026-04-26T00:00:00Z",
+  "description": "AgentHub Memory Index",
+  "levels": {
+    "L0": { "name": "瞬时记忆", "ttl": 300, "path": "short-term/L0" },
+    "L1": { "name": "工作记忆", "ttl": 3600, "path": "short-term/L1" },
+    "L2": { "name": "短期记忆", "ttl": 604800, "path": "short-term/L2" },
+    "L3": { "name": "长期记忆", "ttl": null, "path": "long-term/entities" },
+    "L4": { "name": "知识图谱", "ttl": null, "path": "knowledge" }
+  },
+  "items": {}
+}

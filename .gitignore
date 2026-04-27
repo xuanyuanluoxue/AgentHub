@@ -40,6 +40,9 @@ runtime/
 # macOS
 .DS_Store
 
+# 开发文件夹（不提交 Git）
+dev/
+
 # 开发文档（不提交 Git）
 开发计划书.md
 
