@@ -29,10 +29,10 @@ requires = ["setuptools>=61.0"]
 build-backend = "setuptools.build_meta"
 
 [tool.setuptools.packages.find]
-where = ["核心"]
+where = ["core"]
 
 [tool.pytest.ini_options]
-testpaths = ["测试"]
+testpaths = ["test"]
 python_files = ["test_*.py"]
 python_functions = ["test_*"]
 addopts = "-v"
