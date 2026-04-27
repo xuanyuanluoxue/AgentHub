@@ -2,37 +2,28 @@
 # AgentHub 一键安装脚本 - Linux/macOS/WSL
 #
 # 用法:
-#   curl -fsSL https://.../install.sh | bash        # 非交互模式（管道）
-#   curl -fsSL https://.../install.sh | bash -s -- -y  # 强制非交互
+#   curl -fsSL https://.../install.sh | bash        # 一键安装（检测到已安装则询问）
+#   curl -fsSL https://.../install.sh | bash -s -- -f  # 强制重装
 #   bash install.sh                              # 交互模式
-#   bash install.sh -y                           # 非交互模式
+#   bash install.sh -f                           # 强制重装
 #
 
 set -e
 
 # ============================================
-# 检测是否为管道输入（非交互必须）
+# 检测管道输入
 # ============================================
-# 方法: 如果 /dev/stdin 是管道文件而非终端，始终非交互
 is_piped() {
-    # 管道: [ -p /dev/stdin ] 为真
-    # FIFO: [ -p /dev/fd/0 ] 为真
-    # 终端: [ -c /dev/stdin ] 为真 (character device)
-    # 文件: [ -f /dev/stdin ] 为真
-
     if [ -p /dev/stdin ] || [ -p /dev/fd/0 ]; then
-        return 0  # 是管道
+        return 0
     fi
-
-    # 如果 stdin 是文件且有内容（重定向）
     if [ -f /dev/stdin ]; then
         local bytes=$(cat /dev/stdin 2>/dev/null | wc -c)
         if [ "$bytes" -gt 0 ]; then
-            return 0  # 有输入内容
+            return 0
         fi
     fi
-
-    return 1  # 非管道
+    return 1
 }
 
 # ============================================
@@ -54,18 +45,25 @@ NC='\033[0m'
 REPO_URL="https://github.com/xuanyuanluoxue/AgentHub.git"
 INSTALL_DIR="${HOME}/.agenthub"
 BACKUP_DIR="${HOME}/.agenthub.backup.$(date +%Y%m%d%H%M%S)"
+FORCE_REINSTALL=false
 INTERACTIVE=true
 
-# 解析参数（必须在任何提示之前）
+# 解析参数
 while [[ $# -gt 0 ]]; do
     case $1 in
-        -y|--yes|--non-interactive)
+        -f|--force)
+            FORCE_REINSTALL=true
+            shift
+            ;;
+        -y|--yes)
             INTERACTIVE=false
+            FORCE_REINSTALL=true
             shift
             ;;
         -h|--help)
-            echo "用法: $0 [-y] [安装目录]"
-            echo "  -y, --yes  非交互模式，自动确认所有提示"
+            echo "用法: $0 [-f] [安装目录]"
+            echo "  -f, --force  强制重装（覆盖现有配置）"
+            echo "  -y, --yes    非交互模式，自动确认"
             exit 0
             ;;
         *)
@@ -75,7 +73,7 @@ while [[ $# -gt 0 ]]; do
     esac
 done
 
-# 如果是管道输入，自动非交互
+# 管道输入时，非交互但不强制的
 if is_piped; then
     INTERACTIVE=false
 fi
@@ -87,12 +85,8 @@ log_info() { echo -e "${BLUE}➜${NC} $1"; }
 log_success() { echo -e "${GREEN}✓${NC} $1"; }
 log_warn() { echo -e "${YELLOW}⚠${NC} $1"; }
 log_error() { echo -e "${RED}✗${NC} $1"; }
-log_step() { echo -e "${CYAN}▸${NC} $1"; }
 log_dim() { echo -e "${DIM}$1${NC}"; }
 
-# ============================================
-# 分隔线
-# ============================================
 print_divider() {
     echo -e "${DIM}$(printf '─%.0s' $(seq 1 50))${NC}"
 }
@@ -115,14 +109,14 @@ print_banner() {
 }
 
 # ============================================
-# 确认提示（仅交互模式）
+# 确认提示
 # ============================================
 confirm() {
     local message="$1"
     local default="${2:-N}"
 
     if [ "$INTERACTIVE" = false ]; then
-        return 0  # 非交互模式，始终确认
+        return 1  # 非交互模式，返回 false（不确认）
     fi
 
     if [ "$default" = "Y" ]; then
@@ -135,6 +129,16 @@ confirm() {
     echo ""
 
     if [[ $REPLY =~ ^[Yy]$ ]] || [[ -z $REPLY && "$default" == "Y" ]]; then
+        return 0
+    fi
+    return 1
+}
+
+# ============================================
+# 检查是否已安装
+# ============================================
+is_installed() {
+    if [ -d "${INSTALL_DIR}" ] && [ -f "${INSTALL_DIR}/pyproject.toml" ]; then
         return 0
     fi
     return 1
@@ -189,27 +193,32 @@ check_dependencies() {
 }
 
 # ============================================
-# 备份现有配置
+# 备份/清理现有配置
 # ============================================
-backup_existing() {
-    if [ -d "${INSTALL_DIR}" ]; then
-        echo -e "${BOLD}▸ 备份现有配置${NC}"
-        print_divider
-        log_warn "发现已存在的 AgentHub 配置"
+prepare_existing() {
+    echo -e "${BOLD}▸ 准备现有配置${NC}"
+    print_divider
 
-        if confirm "  是否备份?"; then
-            log_info "正在备份到 ${BACKUP_DIR}..."
-            if mv "${INSTALL_DIR}" "${BACKUP_DIR}" 2>/dev/null; then
-                log_success "备份完成"
-            else
-                log_error "备份失败"
-                exit 1
-            fi
+    if confirm "  检测到已安装 AgentHub，是否重装?"; then
+        log_info "正在备份到 ${BACKUP_DIR}..."
+        if mv "${INSTALL_DIR}" "${BACKUP_DIR}" 2>/dev/null; then
+            log_success "备份完成 (位于 ${BACKUP_DIR})"
         else
-            log_warn "跳过备份，现有配置将被覆盖"
-            rm -rf "${INSTALL_DIR}"
+            log_error "备份失败"
+            exit 1
         fi
         echo ""
+        return 0  # 需要重装
+    else
+        echo ""
+        log_info "跳过重装，现有配置保持不变"
+        echo ""
+        echo -e "${BOLD}▸ 下一步${NC}"
+        print_divider
+        echo -e "  ${CYAN}1.${NC} 验证安装: ${DIM}agenthub status${NC}"
+        echo -e "  ${CYAN}2.${NC} 搜索 Skills: ${DIM}agenthub clawhub search github${NC}"
+        echo ""
+        exit 0
     fi
 }
 
@@ -219,13 +228,6 @@ backup_existing() {
 clone_repo() {
     echo -e "${BOLD}▸ 下载 AgentHub${NC}"
     print_divider
-
-    if [ -d "${INSTALL_DIR}" ] && [ -f "${INSTALL_DIR}/pyproject.toml" ]; then
-        log_info "发现已安装的 AgentHub，跳过下载"
-        echo -e "  ${DIM}目录: ${INSTALL_DIR}${NC}"
-        echo ""
-        return 0
-    fi
 
     log_info "正在克隆仓库..."
     echo -e "  ${DIM}来源: ${REPO_URL}${NC}"
@@ -264,7 +266,7 @@ install_package() {
     local install_ok=false
     local install_method=""
 
-    # 方法 1: pip install --user (推荐)
+    # 方法 1: pip install --user
     log_dim "  尝试: pip install --user..."
     if pip install --user -e . 2>&1; then
         install_ok=true
@@ -312,10 +314,6 @@ install_package() {
         echo -e "  ${CYAN}cd ~/.agenthub${NC}"
         echo -e "  ${CYAN}pip install --user -e .${NC}"
         echo ""
-        log_info "或创建虚拟环境:"
-        echo -e "  ${CYAN}python3 -m venv ~/.agenthub/.venv${NC}"
-        echo -e "  ${CYAN}~/.agenthub/.venv/bin/pip install -e .${NC}"
-        echo ""
         exit 1
     fi
     echo ""
@@ -353,7 +351,7 @@ init_config() {
     if [ -f "${INSTALL_DIR}/profile/identity.yaml" ]; then
         log_info "配置文件已存在，跳过初始化"
         echo ""
-        return 0
+        return
     fi
 
     log_info "创建默认配置文件..."
@@ -413,7 +411,20 @@ print_complete() {
 main() {
     print_banner
     check_dependencies
-    backup_existing
+
+    # 检测已安装
+    if is_installed; then
+        if [ "$FORCE_REINSTALL" = true ]; then
+            # 强制重装
+            log_info "强制重装模式，跳过备份"
+            rm -rf "${INSTALL_DIR}"
+            echo ""
+        else
+            # 询问是否重装
+            prepare_existing
+        fi
+    fi
+
     clone_repo
     install_package
     init_config
