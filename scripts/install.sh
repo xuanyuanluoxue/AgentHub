@@ -1,16 +1,6 @@
 #!/bin/bash
 # AgentHub 安装路由脚本
-# 自动检测操作系统并路由到对应安装/卸载脚本
 #
-# 用法:
-#   curl -fsSL https://raw.githubusercontent.com/xuanyuanluoxue/AgentHub/main/scripts/install.sh | bash
-#   bash install.sh
-#
-# 卸载:
-#   curl -fsSL https://raw.githubusercontent.com/xuanyuanluoxue/AgentHub/main/scripts/install.sh | bash --uninstall
-#   bash install.sh --uninstall
-#
-
 set -e
 
 # ============================================
@@ -39,11 +29,11 @@ log_error() { echo -e "${RED}x${NC} $1"; }
 # ============================================
 print_banner() {
     echo ""
-    echo -e "  ${BOLD}${MAGENTA}╔═══════════════════════════════════╗${NC}"
-    echo -e "  ${BOLD}${MAGENTA}║${NC}       ${BOLD}${GREEN}AgentHub${NC}                      ${BOLD}${MAGENTA}║${NC}"
-    echo -e "  ${BOLD}${MAGENTA}║${NC}       ${CYAN}统一 AI 工具四大共享生态${NC}       ${BOLD}${MAGENTA}║${NC}"
-    echo -e "  ${BOLD}${MAGENTA}║${NC}       ${DIM}Skill · Agent · 画像 · 记忆${NC}  ${BOLD}${MAGENTA}║${NC}"
-    echo -e "  ${BOLD}${MAGENTA}╚═══════════════════════════════════╝${NC}"
+    echo -e "  ${MAGENTA}┌─────────────────────────────────────┐${NC}"
+    echo -e "  ${MAGENTA}│${NC}             ${BOLD}${GREEN}AgentHub${NC}                  ${MAGENTA}│${NC}"
+    echo -e "  ${MAGENTA}│${NC}        ${CYAN}统一 AI 工具四大共享生态${NC}        ${MAGENTA}│${NC}"
+    echo -e "  ${MAGENTA}│${NC}      ${DIM}Skill · Agent · 画像 · 记忆${NC}      ${MAGENTA}│${NC}"
+    echo -e "  ${MAGENTA}└─────────────────────────────────────┘${NC}"
     echo ""
 }
 
@@ -135,12 +125,32 @@ download_and_run() {
 # 显示菜单
 # ============================================
 show_menu() {
-    echo -e "  ${BOLD}请选择操作:${NC}"
+    echo "  请选择操作:"
     echo ""
-    echo "    ${GREEN}1${NC}. 安装 AgentHub"
-    echo "    ${YELLOW}2${NC}. 卸载 AgentHub"
-    echo "    ${DIM}3${NC}. 退出"
+    echo "    [${GREEN}1${NC}] 安装 AgentHub"
+    echo "    [${YELLOW}2${NC}] 卸载 AgentHub"
+    echo "    [${DIM}3${NC}] 退出"
     echo ""
+}
+
+# ============================================
+# 读取用户选择
+# ============================================
+get_choice() {
+    local prompt="  请输入选项 [1-3]: "
+    local choice=""
+
+    if [ -e /dev/tty ]; then
+        echo -n "$prompt"
+        read -n 1 choice < /dev/tty
+        echo ""
+    else
+        echo -n "$prompt"
+        read -n 1 choice
+        echo ""
+    fi
+
+    echo "$choice"
 }
 
 # ============================================
@@ -177,16 +187,7 @@ main() {
         fi
 
         show_menu
-
-        if [ -e /dev/tty ]; then
-            echo -n "  请输入选项 [1-3]: "
-            read -n 1 choice < /dev/tty
-            echo ""
-        else
-            echo -n "  请输入选项 [1-3]: "
-            read -n 1 choice
-            echo ""
-        fi
+        local choice=$(get_choice)
         echo ""
 
         case "$choice" in
