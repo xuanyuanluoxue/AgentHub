@@ -186,6 +186,7 @@ main() {
         case "$choice" in
             1) action="install" ;;
             2) action="uninstall" ;;
+            "") echo -e "  ${YELLOW}! 无输入，默认选择 [1]${NC}"; action="install" ;;
             *) log_info "退出"; exit 0 ;;
         esac
     fi
