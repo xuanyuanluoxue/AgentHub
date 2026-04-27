@@ -95,7 +95,7 @@
                     </div>
                     <div>
                         <h1 class="text-xl font-bold gradient-text">AgentHub</h1>
-                        <p class="text-xs text-gray-400">AI 工具管理中心 · 默认配置: C:\Users\Chatxavier\.agenthub</p>
+                        <p class="text-xs text-gray-400">AI 工具管理中心 · 默认配置: ~/.agenthub</p>
                     </div>
                 </div>
                 <div class="flex items-center gap-4">
@@ -252,7 +252,7 @@
                     <div class="flex items-center justify-between mb-4">
                         <h2 class="text-lg font-semibold flex items-center gap-2">
                             🌐 公共 Skill 库
-                            <span class="text-xs text-gray-400 font-normal">来源: D:\Obsidian\AI\交接文档\shared-skills\</span>
+                            <span class="text-xs text-gray-400 font-normal">来源: ~/shared-skills/</span>
                         </h2>
                         <div class="flex gap-2">
                             <input 
@@ -335,7 +335,7 @@
                                 <span class="text-2xl">📁</span>
                                 <div>
                                     <h4 class="font-medium text-sm">共享 Skills 目录</h4>
-                                    <p class="text-xs text-gray-400">D:\Obsidian\AI\交接文档\shared-skills\</p>
+                                    <p class="text-xs text-gray-400">~/shared-skills/</p>
                                 </div>
                             </div>
                             <p class="text-xs text-gray-400 mb-3">包含 {{ sharedSkillsCount }} 个共享 Skill，可一键导入到 AgentHub</p>
@@ -348,7 +348,7 @@
                                 <span class="text-2xl">💾</span>
                                 <div>
                                     <h4 class="font-medium text-sm">备份与恢复</h4>
-                                    <p class="text-xs text-gray-400">C:\Users\Chatxavier\.agenthub\backup\</p>
+                                    <p class="text-xs text-gray-400">~/.agenthub/backup/</p>
                                 </div>
                             </div>
                             <p class="text-xs text-gray-400 mb-3">将当前配置备份到云端或从云端恢复</p>
@@ -375,7 +375,7 @@
                                 </div>
                                 <div>
                                     <h3 class="font-semibold">AgentHub 配置目录</h3>
-                                    <p class="text-xs text-gray-400">C:\Users\Chatxavier\.agenthub</p>
+                                    <p class="text-xs text-gray-400">~/.agenthub</p>
                                 </div>
                             </div>
                             <div class="space-y-2 text-sm mb-4">
@@ -638,9 +638,9 @@
                         icon: '⚡',
                         color: 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)',
                         description: 'AI 编程助手，支持代码补全、重构、解释',
-                        configPath: 'C:\\Users\\Chatxavier\\.config\\opencode',
-                        skillsPath: 'C:\\Users\\Chatxavier\\.config\\opencode\\skills',
-                        agentsPath: 'C:\\Users\\Chatxavier\\.config\\opencode\\agents',
+                        configPath: 'C:\\Users\\User\\.config\\opencode',
+                        skillsPath: 'C:\\Users\\User\\.config\\opencode\\skills',
+                        agentsPath: 'C:\\Users\\User\\.config\\opencode\\agents',
                     },
                     {
                         id: 'openclaw',
@@ -648,9 +648,9 @@
                         icon: '🦎',
                         color: 'linear-gradient(135deg, #f093fb 0%, #f5576c 100%)',
                         description: 'AI Agent 框架，支持多工具协作和任务编排',
-                        configPath: 'C:\\Users\\Chatxavier\\.openclaw',
-                        skillsPath: 'C:\\Users\\Chatxavier\\.openclaw\\skills',
-                        agentsPath: 'C:\\Users\\Chatxavier\\.openclaw\\subagents',
+                        configPath: 'C:\\Users\\User\\.openclaw',
+                        skillsPath: 'C:\\Users\\User\\.openclaw\\skills',
+                        agentsPath: 'C:\\Users\\User\\.openclaw\\subagents',
                     },
                     {
                         id: 'claude',
@@ -658,9 +658,9 @@
                         icon: '🧠',
                         color: 'linear-gradient(135deg, #4facfe 0%, #00f2fe 100%)',
                         description: 'Anthropic Claude 模型，本地桌面集成',
-                        configPath: 'C:\\Users\\Chatxavier\\.claude',
-                        skillsPath: 'C:\\Users\\Chatxavier\\.claude\\SKILLS',
-                        agentsPath: 'C:\\Users\\Chatxavier\\.claude\\agents',
+                        configPath: 'C:\\Users\\User\\.claude',
+                        skillsPath: 'C:\\Users\\User\\.claude\\SKILLS',
+                        agentsPath: 'C:\\Users\\User\\.claude\\agents',
                     },
                     {
                         id: 'codebuddy',
@@ -668,9 +668,9 @@
                         icon: '💻',
                         color: 'linear-gradient(135deg, #43e97b 0%, #38f9d7 100%)',
                         description: '通义灵码，国内生态 AI 编程助手',
-                        configPath: 'C:\\Users\\Chatxavier\\.codebuddy',
-                        skillsPath: 'C:\\Users\\Chatxavier\\.codebuddy\\skills-marketplace\\skills',
-                        agentsPath: 'C:\\Users\\Chatxavier\\.codebuddy\\instances.json',
+                        configPath: 'C:\\Users\\User\\.codebuddy',
+                        skillsPath: 'C:\\Users\\User\\.codebuddy\\skills-marketplace\\skills',
+                        agentsPath: 'C:\\Users\\User\\.codebuddy\\instances.json',
                     },
                     {
                         id: 'cursor',
@@ -678,7 +678,7 @@
                         icon: '📝',
                         color: 'linear-gradient(135deg, #a8edea 0%, #fed6e3 100%)',
                         description: 'AI 代码编辑器，基于 VSCode',
-                        configPath: 'C:\\Users\\Chatxavier\\.cursor',
+                        configPath: 'C:\\Users\\User\\.cursor',
                         skillsPath: null,
                         agentsPath: null,
                     },
@@ -688,9 +688,9 @@
                         icon: '🐉',
                         color: 'linear-gradient(135deg, #ff9a9e 0%, #fecfef 100%)',
                         description: '终端 AI 助手，支持多工具集成',
-                        configPath: 'C:\\Users\\Chatxavier\\.hermes',
-                        skillsPath: 'C:\\Users\\Chatxavier\\.hermes\\skills',
-                        agentsPath: 'C:\\Users\\Chatxavier\\.hermes\\agents',
+                        configPath: 'C:\\Users\\User\\.hermes',
+                        skillsPath: 'C:\\Users\\User\\.hermes\\skills',
+                        agentsPath: 'C:\\Users\\User\\.hermes\\agents',
                     },
                     {
                         id: 'agenthub',
@@ -698,13 +698,13 @@
                         icon: '🤖',
                         color: 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)',
                         description: 'AI 工具管理平台，中央控制中心',
-                        configPath: 'C:\\Users\\Chatxavier\\.agenthub',
-                        skillsPath: 'C:\\Users\\Chatxavier\\.agenthub\\skills',
-                        agentsPath: 'C:\\Users\\Chatxavier\\.agenthub\\agents',
+                        configPath: 'C:\\Users\\User\\.agenthub',
+                        skillsPath: 'C:\\Users\\User\\.agenthub\\skills',
+                        agentsPath: 'C:\\Users\\User\\.agenthub\\agents',
                     },
                 ];
 
-                // 公共 Skill 库数据（来自 D:\Obsidian\AI\交接文档\shared-skills\）
+                // 公共 Skill 库数据（来自 ~/shared-skills/）
                 const publicSkills = ref([
                     // 开发类
                     { name: '全栈开发', category: '开发', tool: '通用', description: 'Full-stack backend architecture and frontend-backend integration guidelines' },
@@ -742,14 +742,17 @@
 
                 // 其他公共资源
                 const publicResources = ref([
-                    { name: '共享 Skills', icon: '📦', count: '26+ Skills', description: 'D:\\Obsidian\\AI\\交接文档\\shared-skills\\' },
-                    { name: '用户画像', icon: '👤', count: '个人资料', description: 'D:\\Obsidian\\AI\\交接文档\\个人画像\\' },
-                    { name: '项目文档', icon: '📁', count: '待办/日志', description: 'D:\\Obsidian\\AI\\小落\\' },
-                    { name: '博客草稿', icon: '✍️', count: '文章', description: 'D:\\Obsidian\\AI\\blog-drafts\\' },
-                    { name: '知识库', icon: '📚', count: '笔记', description: 'D:\\Obsidian\\vault\\' },
-                    { name: '服务器备份', icon: '☁️', count: '远程', description: 'Sherry知识库 @ 8.215.68.48' },
-                    { name: 'AgentHub配置', icon: '🤖', count: '主配置', description: 'C:\\Users\\Chatxavier\\.agenthub\\' },
-                    { name: 'Windows配置', icon: '⚙️', count: '系统', description: 'C:\\Users\\Chatxavier\\.config\\' },
+                    { name: '共享 Skills', icon: '📦', count: '26+ Skills', description: '~/shared-skills/' },
+                     { name: '用户画像', icon: '👤', count: '个人资料', description: '~/.agenthub/profile/' },
+
+                     { name: '项目文档', icon: '📁', count: '待办/日志', description: '~/projects/' },
+
+                     { name: '博客草稿', icon: '✍️', count: '文章', description: '~/blog-drafts/' },
+
+                     { name: '知识库', icon: '📚', count: '笔记', description: '~/knowledge/vault/' },
+                    { name: '服务器备份', icon: '☁️', count: '远程', description: 'Sherry知识库 @ your-server-ip' },
+                    { name: 'AgentHub配置', icon: '🤖', count: '主配置', description: 'C:\\Users\\User\\.agenthub\\' },
+                    { name: 'Windows配置', icon: '⚙️', count: '系统', description: 'C:\\Users\\User\\.config\\' },
                 ]);
 
                 // AgentHub 配置文件夹结构
@@ -842,15 +845,15 @@
                             ...definedTools[0],
                             detected: true,
                             skills: [
-                                { name: '123-cloud', path: 'C:\\Users\\Chatxavier\\.config\\opencode\\skills\\123-cloud' },
-                                { name: '123pan', path: 'C:\\Users\\Chatxavier\\.config\\opencode\\skills\\123pan' },
-                                { name: '创业验证', path: 'C:\\Users\\Chatxavier\\.config\\opencode\\skills\\创业验证' },
-                                { name: '全栈开发', path: 'C:\\Users\\Chatxavier\\.config\\opencode\\skills\\全栈开发' },
-                                { name: '腾讯文档', path: 'C:\\Users\\Chatxavier\\.config\\opencode\\skills\\腾讯文档' },
-                                { name: '微信小程序开发框架', path: 'C:\\Users\\Chatxavier\\.config\\opencode\\skills\\微信小程序开发框架' },
-                                { name: 'adb-sms-query', path: 'C:\\Users\\Chatxavier\\.config\\opencode\\skills\\adb-sms-query' },
-                                { name: 'ai-work', path: 'C:\\Users\\Chatxavier\\.config\\opencode\\skills\\ai-work' },
-                                { name: 'alipay-payment-integration', path: 'C:\\Users\\Chatxavier\\.config\\opencode\\skills\\alipay-payment-integration' },
+                                { name: '123-cloud', path: 'C:\\Users\\User\\.config\\opencode\\skills\\123-cloud' },
+                                { name: '123pan', path: 'C:\\Users\\User\\.config\\opencode\\skills\\123pan' },
+                                { name: '创业验证', path: 'C:\\Users\\User\\.config\\opencode\\skills\\创业验证' },
+                                { name: '全栈开发', path: 'C:\\Users\\User\\.config\\opencode\\skills\\全栈开发' },
+                                { name: '腾讯文档', path: 'C:\\Users\\User\\.config\\opencode\\skills\\腾讯文档' },
+                                { name: '微信小程序开发框架', path: 'C:\\Users\\User\\.config\\opencode\\skills\\微信小程序开发框架' },
+                                { name: 'adb-sms-query', path: 'C:\\Users\\User\\.config\\opencode\\skills\\adb-sms-query' },
+                                { name: 'ai-work', path: 'C:\\Users\\User\\.config\\opencode\\skills\\ai-work' },
+                                { name: 'alipay-payment-integration', path: 'C:\\Users\\User\\.config\\opencode\\skills\\alipay-payment-integration' },
                             ],
                             agents: [
                                 { name: 'dev-agent', description: '开发 Agent', enabled: true },
@@ -867,11 +870,11 @@
                             ...definedTools[1],
                             detected: true,
                             skills: [
-                                { name: 'alipay-payment-integration', path: 'C:\\Users\\Chatxavier\\.openclaw\\skills\\alipay-payment-integration' },
-                                { name: 'course-schedule', path: 'C:\\Users\\Chatxavier\\.openclaw\\skills\\course-schedule' },
-                                { name: 'feishu-notify', path: 'C:\\Users\\Chatxavier\\.openclaw\\skills\\feishu-notify' },
-                                { name: 'minimax-skill', path: 'C:\\Users\\Chatxavier\\.openclaw\\skills\\minimax-skill' },
-                                { name: 'skill-finder.skill', path: 'C:\\Users\\Chatxavier\\.openclaw\\skills\\skill-finder.skill' },
+                                { name: 'alipay-payment-integration', path: 'C:\\Users\\User\\.openclaw\\skills\\alipay-payment-integration' },
+                                { name: 'course-schedule', path: 'C:\\Users\\User\\.openclaw\\skills\\course-schedule' },
+                                { name: 'feishu-notify', path: 'C:\\Users\\User\\.openclaw\\skills\\feishu-notify' },
+                                { name: 'minimax-skill', path: 'C:\\Users\\User\\.openclaw\\skills\\minimax-skill' },
+                                { name: 'skill-finder.skill', path: 'C:\\Users\\User\\.openclaw\\skills\\skill-finder.skill' },
                             ],
                             agents: [],
                             configInfo: {
@@ -895,7 +898,7 @@
                             ...definedTools[3],
                             detected: true,
                             skills: [
-                                { name: 'research', path: 'C:\\Users\\Chatxavier\\.codebuddy\\skills-marketplace\\research' },
+                                { name: 'research', path: 'C:\\Users\\User\\.codebuddy\\skills-marketplace\\research' },
                             ],
                             agents: [],
                             configInfo: {
@@ -914,8 +917,8 @@
                             ...definedTools[5],
                             detected: true,
                             skills: [
-                                { name: 'hermes-agent', path: 'C:\\Users\\Chatxavier\\.hermes\\skills\\hermes-agent' },
-                                { name: 'dev-agent', path: 'C:\\Users\\Chatxavier\\.hermes\\skills\\dev-agent' },
+                                { name: 'hermes-agent', path: 'C:\\Users\\User\\.hermes\\skills\\hermes-agent' },
+                                { name: 'dev-agent', path: 'C:\\Users\\User\\.hermes\\skills\\dev-agent' },
                             ],
                             agents: [],
                             configInfo: {

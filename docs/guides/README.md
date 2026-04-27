@@ -2,8 +2,8 @@
 
 > 图形化管理和部署 AI 工具的中央控制中心
 
-[![Stars](https://img.shields.io/github/stars/xuanyuanluoxue/agenthub)](https://github.com/xuanyuanluoxue/agenthub/stargazers)
-[![License](https://img.shields.io/github/license/xuanyuanluoxue/agenthub)](LICENSE)
+[![Stars](https://img.shields.io/github/stars/your-org/agenthub)](https://github.com/your-org/agenthub/stargazers)
+[![License](https://img.shields.io/github/license/your-org/agenthub)](LICENSE)
 
 ## 🎯 这是什么？
 
@@ -168,7 +168,7 @@ agenthub/
 AgentHub 内置**公共 Skill 资源库**，来源目录：
 
 ```
-D:\Obsidian\AI\交接文档\shared-skills\
+~/shared-skills/
 ```
 
 包含 26+ 共享 Skills，分类：
@@ -186,11 +186,11 @@ D:\Obsidian\AI\交接文档\shared-skills\
 
 | 资源 | 路径 |
 |------|------|
-| 用户画像 | `D:\Obsidian\AI\交接文档\个人画像\` |
-| 项目文档 | `D:\Obsidian\AI\小落\` |
-| 博客草稿 | `D:\Obsidian\AI\blog-drafts\` |
-| 知识库 | `D:\Obsidian\vault\` |
-| 服务器备份 | `Sherry知识库 @ 8.215.68.48` |
+| 用户画像 | `~/.agenthub/profile/` |
+| 项目文档 | `~/projects/` |
+| 博客草稿 | `~/blog-drafts/` |
+| 知识库 | `~/knowledge/vault/` |
+| 服务器备份 | `your-server@example.com:/backup` |
 
 ## 🤖 内置 Agent
 

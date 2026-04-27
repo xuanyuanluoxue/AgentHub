@@ -112,7 +112,7 @@ class MemoryEngine:
 
     使用示例:
         engine = MemoryEngine("~/.agenthub/memory")
-        engine.add("用户叫陈新捷", level=MemoryLevel.L1_WORKING, tags=["用户信息"])
+        engine.add("用户叫用户名", level=MemoryLevel.L1_WORKING, tags=["用户信息"])
         items = engine.search("用户名字")
         engine.cleanup()  # 清理过期记忆
     """
@@ -440,7 +440,7 @@ class MemoryEngine:
 if __name__ == "__main__":
     # 测试
     engine = MemoryEngine("~/.agenthub/test_memory")
-    engine.add("用户叫陈新捷", level=MemoryLevel.L2_SHORT_TERM, tags=["用户信息"])
+    engine.add("用户叫用户名", level=MemoryLevel.L2_SHORT_TERM, tags=["用户信息"])
     engine.add("用户的项目叫 AgentHub", level=MemoryLevel.L2_SHORT_TERM, tags=["项目"])
     print(engine.get_stats())
-    print(engine.search("陈新捷"))
+    print(engine.search("用户名"))

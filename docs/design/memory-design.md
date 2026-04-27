@@ -47,14 +47,14 @@ engine = MemoryEngine("~/.agenthub/memory")
 
 # 添加记忆
 item = engine.add(
-    content="用户叫陈新捷",
+    content="用户叫用户名",
     level=MemoryLevel.L2_SHORT_TERM,
     tags=["用户信息"],
     importance=0.8,
 )
 
 # 搜索记忆
-results = engine.search("陈新捷", level=MemoryLevel.L2_SHORT_TERM)
+results = engine.search("用户名", level=MemoryLevel.L2_SHORT_TERM)
 
 # 升级记忆
 engine.upgrade(item.id)  # 自动判断目标级别
@@ -75,11 +75,11 @@ short_term = ShortTermMemory()
 session = short_term.create_session("session_123")
 
 # 添加对话轮次
-short_term.add_turn("user", "我叫陈新捷")
-short_term.add_turn("assistant", "好的，陈新捷")
+short_term.add_turn("user", "我叫用户名")
+short_term.add_turn("assistant", "好的，用户名")
 
 # 提取关键事实
-short_term.extract_to_working("用户名字：陈新捷")
+short_term.extract_to_working("用户名字：用户名")
 
 # 列出所有会话
 sessions = short_term.list_sessions()
@@ -96,7 +96,7 @@ long_term = LongTermMemory()
 # 创建实体
 entity = long_term.create_entity(
     entity_type="person",
-    name="陈新捷",
+    name="用户名",
     description="广州科技职业技术大学学生",
 )
 
@@ -116,7 +116,7 @@ entity.add_relationship(
 )
 
 # 搜索实体
-results = long_term.search("陈新捷")
+results = long_term.search("用户名")
 ```
 
 ### knowledge.py - 知识图谱
@@ -129,7 +129,7 @@ kg = KnowledgeGraph()
 
 # 添加节点
 user_node = kg.add_node(
-    label="陈新捷",
+    label="用户名",
     node_type="person",
     properties={"role": "开发者"},
 )
@@ -165,13 +165,13 @@ extractor = ContextExtractor(short_term, long_term)
 # 处理对话
 info = extractor.process_conversation(
     role="user",
-    content="我叫陈新捷，是广州科技职业技术大学的学生",
+    content="我叫用户名，是广州科技职业技术大学的学生",
 )
 
 # 批量处理
 conversations = [
-    {"role": "user", "content": "我叫陈新捷"},
-    {"role": "assistant", "content": "好的，陈新捷"},
+    {"role": "user", "content": "我叫用户名"},
+    {"role": "assistant", "content": "好的，用户名"},
     {"role": "user", "content": "我在做 AgentHub 项目"},
 ]
 all_info = extractor.bulk_extract(conversations)
@@ -186,10 +186,10 @@ from agenthub.core.memory import MemoryRetrieval
 retrieval = MemoryRetrieval(engine, long_term, kg)
 
 # 检索记忆
-results = retrieval.retrieve("陈新捷", limit=10)
+results = retrieval.retrieve("用户名", limit=10)
 
 # 生成上下文字符串
-context = retrieval.retrieve_with_context("陈新捷")
+context = retrieval.retrieve_with_context("用户名")
 ```
 
 ## 记忆流转
@@ -231,10 +231,10 @@ agenthub memory cleanup --days 7
 
 ```bash
 # 添加记忆
-agenthub memory add "用户叫陈新捷" --level L2 --tags user_info
+agenthub memory add "用户叫用户名" --level L2 --tags user_info
 
 # 搜索记忆
-agenthub memory search "陈新捷"
+agenthub memory search "用户名"
 
 # 查看统计
 agenthub memory stats

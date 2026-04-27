@@ -10,7 +10,7 @@
 ### 1. Clone 仓库
 
 ```bash
-git clone https://github.com/xuanyuanluoxue/agent-system.git
+git clone https://github.com/your-org/agent-system.git
 cd agent-system
 ```
 

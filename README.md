@@ -1,27 +1,117 @@
 # AgentHub
 
-> 统一 AI 工具的 Skill 生态，让开发者在不同 AI 工具间无缝切换。
+> 统一 AI 工具的 Skill · Agent · 用户画像 · 记忆系统 四大共享生态
 
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
 
 ---
 
-## 🎯 项目愿景
+## ⚠️ 隐私声明
 
-解决 OpenClaw、OpenCode、ClawHub 等各种 AI 工具的 **Skill 不统一问题**。
-
-当前市面上的 AI 开发工具各自维护独立的 Skill 体系，导致 Skill 无法复用、重复开发、生态割裂。AgentHub 致力于构建**跨平台的统一 Skill 规范**，实现「一次编写，到处运行」。
-
-[👉 了解更多](./docs/项目愿景.md)
+> **重要**: AgentHub 是**公共开源模板项目**，不包含任何私人信息。
+>
+> - 所有文档中的路径、账号、人名等均为**占位符**
+> - 如果你看到类似 `your-server-ip`、`username`、`your-org` 等，请理解为占位符
+> - 如需使用，请基于模板创建你自己的配置
 
 ---
 
-## ✨ 核心特性
+## 🎯 项目愿景
 
-- **统一格式** — 所有支持的 AI 工具使用相同的 Skill 规范（v2.0）
-- **跨平台兼容** — 一套 Skill，OpenClaw / OpenCode / ClawHub / Hermes 通用
-- **共享技能库** — 集中管理，避免重复建设
-- **社区共建** — 集体智慧，持续迭代
+当前 AI 开发工具（OpenClaw、OpenCode、ClawHub、Claude Code 等）各自为战：
+- Skill 无法互通，重复开发
+- Agent 每工具独立配置
+- 用户画像换工具就丢失
+- 记忆不持久，每次对话重新开始
+
+**AgentHub 致力于构建跨平台统一规范，实现四大共享生态。**
+
+---
+
+## 💎 四大核心卖点
+
+### 1️⃣ 共享 Skill 库 — 一次编写，到处运行
+
+| 特性 | 说明 |
+|------|------|
+| **统一格式** | YAML frontmatter + Markdown，工具无关 |
+| **跨平台兼容** | OpenClaw / OpenCode / ClawHub / Hermes 通用 |
+| **依赖管理** | SemVer 版本控制，自动解析依赖 |
+| **触发词机制** | 智能匹配用户输入，自动加载 Skill |
+
+```
+skills/
+├── github-pr/              # GitHub PR 管理
+├── adb-debug/              # ADB 调试
+├── browser-bridge/         # 浏览器自动化
+└── 50+ 共享 Skill
+```
+
+[📖 Skill 规范 v2.0](./docs/skill-format.md)
+
+---
+
+### 2️⃣ 共享 Agent 库 — 专业角色，智能路由
+
+| 特性 | 说明 |
+|------|------|
+| **类型定义** | Router（路由型）+ Specialist（专家型） |
+| **技能绑定** | 自动加载所需 Skills |
+| **记忆配置** | 短期/长期记忆策略可定制 |
+| **跨工具共享** | 同一 Agent 配置，多工具通用 |
+
+```
+agents/
+├── main-agent/             # 主路由入口
+├── dev-agent/              # 开发专家
+├── life-agent/             # 生活服务
+├── ops-agent/              # 运营助手
+└── productivity-agent/     # 效率工具
+```
+
+[📖 Agent 规范 v1.0](./docs/agent-format.md)
+
+---
+
+### 3️⃣ 共享用户画像 — 工具无关，永久携带
+
+| 特性 | 说明 |
+|------|------|
+| **统一格式** | YAML + Markdown，纯文本工具无关 |
+| **身份信息** | 基础资料、联系方式、社交账号 |
+| **偏好设置** | 审美偏好、沟通风格、回复习惯 |
+| **常用路径** | 项目目录、知识库、配置文件路径 |
+
+```
+profile/
+├── identity.yaml           # 身份信息
+├── skills.md              # 技能图谱
+├── contacts/              # 联系人（全中文命名）
+└── growth/                # 成长轨迹
+```
+
+[📖 用户画像规范 v1.0](./docs/user-profile-spec.md)
+
+---
+
+### 4️⃣ 共享记忆系统 — 持久记忆，持续学习
+
+| 特性 | 说明 |
+|------|------|
+| **多层记忆** | 短期 / 长期 / 知识库 三层架构 |
+| **向量检索** | 基于语义相似度的记忆召回 |
+| **上下文管理** | 智能裁剪上下文窗口 |
+| **跨工具同步** | 记忆在多工具间共享 |
+
+```
+memory/
+├── short_term/            # 短期记忆（会话级）
+├── long_term/              # 长期记忆（持久化）
+├── knowledge/              # 知识库（结构化）
+└── retrieval/              # 检索引擎
+```
+
+[📖 记忆系统设计](./docs/memory-system.md)
 
 ---
 
@@ -29,88 +119,97 @@
 
 ```
 .agenthub/
-├── .git/
-├── .gitignore
-├── agents/                 # Agent 定义文档
-├── core/                   # 核心模块
-│   └── agenthub/           # Python 包
-│       ├── cli/            # CLI 命令
-│       └── core/           # Agent / Memory / Skill 核心
-├── dev/                    # 开发文件（不提交 Git）
-├── docs/                   # 文档
-│   ├── 项目愿景.md
-│   ├── skill-format.md      # ★ Skill 规范文档 v2.0
-│   └── ...
-├── projects/               # 项目
-├── scripts/                # 初始化脚本
-├── secrets/                # 密钥（不提交 Git）
-├── skills/                 # Skill 规范
-│   ├── 00-SKILL-SPEC.md
-│   ├── agent/
-│   └── hello-world/
-├── skills-library/         # 共享技能库
-├── test/                   # 测试脚本
-└── web/                    # Web 界面
+├── core/agenthub/          # Python 包
+│   ├── cli/                # CLI 命令
+│   └── core/               # Agent / Memory / Skill / Config
+├── docs/                   # 规范文档
+│   ├── skill-format.md     # ★ Skill 规范
+│   ├── agent-format.md     # ★ Agent 规范
+│   ├── user-profile-spec.md # ★ 用户画像规范
+│   └── memory-system.md    # ★ 记忆系统设计
+├── profile/                # ★ 用户画像
+├── agents/                 # ★ Agent 配置
+├── skills/                 # ★ Skill 示例
+└── skills-library/         # ★ 共享技能库
 ```
 
 ---
 
 ## 🚀 快速开始
 
-### 安装依赖
+### 一键安装（推荐）
+
+**Windows (PowerShell):**
+```powershell
+irm https://raw.githubusercontent.com/your-org/agenthub/main/scripts/install.ps1 | iex
+```
+
+**Linux / macOS / WSL:**
+```bash
+curl -fsSL https://raw.githubusercontent.com/your-org/agenthub/main/scripts/install.sh | bash
+```
+
+### 手动安装
 
 ```bash
-pip install -r requirements.txt
+# 1. 克隆仓库
+git clone https://github.com/your-org/agenthub.git ~/.agenthub
+
+# 2. 安装 Python 包
+cd ~/.agenthub
+pip install -e .
+
+# 3. 初始化配置
+agenthub init --template    # 快速初始化（使用模板）
+agenthub init              # 交互式初始化（自定义名称）
+
+# 4. 开始使用
+agenthub --help
 ```
 
-### 创建第一个 Skill
+### 安装后
 
-参考 [docs/skill-format.md](./docs/skill-format.md) 创建你的 Skill。
-
----
-
-## 📖 Skill 规范（v2.0）
-
-```yaml
----
-name: skill-name                  # ★ 必需：英文 kebab-case
-description: 简短描述              # ★ 必需：一句话说明
-license: MIT                      # 推荐：许可证
-triggers:                         # ★ 必需：触发词数组（复数）
-  - "触发词1"
-  - "触发词2"
-metadata:
-  version: "1.0.0"               # 版本（SemVer）
-  category: dev                   # 分类
-children: []                      # 父 Skill 填写（xavier 扩展）
-parent: parent-skill              # 子 Skill 填写（xavier 扩展）
----
+```bash
+agenthub skill list        # 查看已安装 Skills
+agenthub agent list        # 查看已安装 Agents
+agenthub profile validate   # 验证配置
 ```
-
-详细规范：[docs/skill-format.md](./docs/skill-format.md)
 
 ---
 
 ## 🤝 支持的工具
 
-| 工具 | 状态 |
-|------|------|
-| OpenClaw | ✅ 已支持 |
-| OpenCode | ✅ 已支持 |
-| ClawHub | ✅ 已支持 |
-| Hermes Agent | ✅ 已支持 |
-| 其他 | 🔄 规划中 |
+| 工具 | Skill | Agent | 画像 | 记忆 |
+|------|-------|-------|------|------|
+| OpenClaw | ✅ | ✅ | ✅ | ✅ |
+| OpenCode | ✅ | ✅ | ✅ | ✅ |
+| ClawHub | ✅ | ✅ | ✅ | ✅ |
+| Hermes Agent | ✅ | ✅ | ✅ | ✅ |
+| Claude Code | ✅ | 🔄 | 🔄 | 🔄 |
 
 ---
 
-## 📚 文档
+## 📚 文档导航
 
 | 文档 | 说明 |
 |------|------|
-| [项目愿景](./docs/项目愿景.md) | 项目背景、解决方案、核心价值 |
-| [Skill 规范](./docs/skill-format.md) | v2.0 规范详解 |
-| [开发指南](./docs/AI_DEVELOPER_GUIDE.md) | 开发者指南 |
-| [快速参考](./docs/QUICK_REFERENCE.md) | 常用操作速查 |
+| [项目愿景](./docs/项目愿景.md) | 问题分析、解决方案、核心价值 |
+| [AI 使用指南](./docs/AI_GUIDE.md) | **★ AI 助手必读** |
+| [Skill 规范](./docs/skill-format.md) | v2.0 规范详解 + 示例 |
+| [Agent 规范](./docs/agent-format.md) | v1.0 规范详解 + 示例 |
+| [用户画像规范](./docs/user-profile-spec.md) | v1.0 规范详解 |
+| [记忆系统设计](./docs/memory-system.md) | 多层记忆架构 |
+
+---
+
+## 🔑 核心价值
+
+| 价值 | 说明 |
+|------|------|
+| **降本增效** | Skill 复用，避免重复开发 |
+| **生态互通** | 打破工具壁垒，自由切换 |
+| **知识沉淀** | Agent、Profile、Memory 共享，集体智慧 |
+| **持续学习** | 记忆持久化，AI 越用越懂你 |
 
 ---
 

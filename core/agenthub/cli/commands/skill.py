@@ -96,13 +96,48 @@ def search_skill(query):
 def rebuild_skill():
     """重建注册表"""
     from agenthub.core.skill.registry import SkillRegistry
-    
+
     registry = SkillRegistry()
     result = registry.rebuild()
-    
+
     click.echo(f"✅ 重建完成")
     click.echo(f"   新增: {result['added']}")
     if result['errors']:
         click.echo(f"   错误: {len(result['errors'])}")
         for err in result['errors']:
             click.echo(f"      - {err}")
+
+
+@skill_cmd.command("update")
+@click.argument("name", required=False)
+@click.option("--all", "-a", is_flag=True, help="更新所有 Skill")
+def update_skill(name, all):
+    """更新 Skill 版本"""
+    import semver
+
+    from agenthub.core.skill.registry import SkillRegistry
+    from agenthub.core.skill.models import DependencySpec
+
+    registry = SkillRegistry()
+
+    if all:
+        skills = registry.list_all()
+        if not skills:
+            click.echo("没有可更新的 Skill")
+            return
+        for skill in skills:
+            click.echo(f"📦 {skill.name} (当前: v{skill.version}) - 更新功能待实现")
+        click.echo(f"\n✅ 共 {len(skills)} 个 Skill")
+        return
+
+    if not name:
+        click.echo("请指定 Skill 名称或使用 --all")
+        return
+
+    skill = registry.get(name)
+    if not skill:
+        click.echo(f"❌ 未找到 Skill: {name}", err=True)
+        return
+
+    click.echo(f"📦 {skill.name} (当前: v{skill.version})")
+    click.echo("   更新功能待实现（需要远程仓库支持）")

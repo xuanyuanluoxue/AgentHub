@@ -63,9 +63,9 @@
 
 | 类别 | 路径 |
 |------|------|
-| 学校信息 | `D:/Obsidian/学校/` |
-| 待办事项 | `projects/todo/` |
-| 工作记录 | `D:/Obsidian/AI/小落/` |
+| 学校信息 | `~/knowledge/school/` |
+| 待办事项 | `~/projects/todo/` |
+| 工作记录 | `~/projects/work/` |
 | 联系人 | `profile/contacts/` |
 
 ---

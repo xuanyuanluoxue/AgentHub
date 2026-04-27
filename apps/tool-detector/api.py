@@ -15,7 +15,7 @@ from pydantic import BaseModel
 from starlette.responses import JSONResponse
 
 # ===== Windows 路径配置 =====
-WINDOWS_HOME = Path("C:/Users/Chatxavier")
+WINDOWS_HOME = Path("C:/Users/User")
 CONFIG_DIR = WINDOWS_HOME / ".config"
 
 # 工具定义

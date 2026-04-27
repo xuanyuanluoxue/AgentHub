@@ -49,7 +49,7 @@ from agenthub.core.memory import create_memory
 mem = create_memory()
 
 # 记住内容
-mem.remember("用户叫 Xavier", level=2)
+mem.remember("用户叫 用户名", level=2)
 
 # 回忆内容
 results = mem.recall("用户")

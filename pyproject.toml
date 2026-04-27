@@ -3,7 +3,7 @@ name = "agenthub"
 version = "0.1.0"
 description = "AgentHub - AI 工具管理平台"
 authors = [
-    {name = "Xavier", email = "xylx104477275@foxmail.com"}
+    {name = "AgentHub Team"}
 ]
 readme = "README.md"
 license = {text = "MIT"}

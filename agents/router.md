@@ -39,12 +39,12 @@
 
 | 路径 | Agent |
 |------|-------|
-| `D:/code/web/` | ops-agent |
-| `D:/code/Android/` | dev-agent |
-| `D:/code/weapp/` | dev-agent |
-| `D:/Obsidian/学校/` | life-agent |
-| `D:/Obsidian/AI/小落/` | life-agent |
-| `D:/Obsidian/业务/` | ops-agent |
+| `~/projects/web/` | ops-agent |
+| `~/projects/android/` | dev-agent |
+| `~/projects/weapp/` | dev-agent |
+| `~/knowledge/school/` | life-agent |
+| `~/knowledge/personal/` | life-agent |
+| `~/knowledge/work/` | ops-agent |
 
 ## Skill 查找优先级
 

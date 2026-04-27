@@ -2,7 +2,7 @@
 name: github-cli
 version: 1.0.0
 description: GitHub CLI 工具集，使用 gh 命令与 GitHub 交互，管理仓库、Issue、PR、Actions 等
-author: Xavier
+author: AgentHub Team
 tags:
   - github
   - cli

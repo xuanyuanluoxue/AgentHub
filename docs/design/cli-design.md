@@ -10,10 +10,10 @@
 
 ```bash
 # Linux/macOS/WSL
-curl -fsSL https://raw.githubusercontent.com/xuanyuanluoxue/agent-system/main/scripts/install.sh | bash
+curl -fsSL https://raw.githubusercontent.com/your-org/agent-system/main/scripts/install.sh | bash
 
 # Windows (PowerShell)
-irm https://raw.githubusercontent.com/xuanyuanluoxue/agent-system/main/scripts/install.ps1 | iex
+irm https://raw.githubusercontent.com/your-org/agent-system/main/scripts/install.ps1 | iex
 ```
 
 ## 命令结构
