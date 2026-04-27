@@ -53,3 +53,4 @@ dev/
 # Environment
 .env
 .env.local
+.obsidian/

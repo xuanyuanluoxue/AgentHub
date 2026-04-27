@@ -29,17 +29,28 @@
 
 ```
 .agenthub/
-├── .git/                    # Git 仓库
-├── .gitignore               # 忽略规则（dev/ 不提交）
-├── docs/
-│   ├── 项目愿景.md          # ★ 项目愿景与背景
-│   └── skill-format.md      # ★ Skill 规范文档 v2.0
-├── skills/
-│   ├── 00-SKILL-SPEC.md     # ★ Skill 规范（同步自 xavier）
-│   ├── agent/               # Agent 记忆系统
-│   └── hello-world/         # 示例 Skill
-├── dev/                     # 开发文件（不提交 Git）
-└── ...
+├── .git/
+├── .gitignore
+├── agents/                 # Agent 定义文档
+├── core/                   # 核心模块
+│   └── agenthub/           # Python 包
+│       ├── cli/            # CLI 命令
+│       └── core/           # Agent / Memory / Skill 核心
+├── dev/                    # 开发文件（不提交 Git）
+├── docs/                   # 文档
+│   ├── 项目愿景.md
+│   ├── skill-format.md      # ★ Skill 规范文档 v2.0
+│   └── ...
+├── projects/               # 项目
+├── scripts/                # 初始化脚本
+├── secrets/                # 密钥（不提交 Git）
+├── skills/                 # Skill 规范
+│   ├── 00-SKILL-SPEC.md
+│   ├── agent/
+│   └── hello-world/
+├── skills-library/         # 共享技能库
+├── test/                   # 测试脚本
+└── web/                    # Web 界面
 ```
 
 ---
