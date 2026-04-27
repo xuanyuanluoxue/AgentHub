@@ -6,25 +6,37 @@
 
 ---
 
-## ⚠️ 隐私声明
+## 🚀 一键安装
 
-> **重要**: AgentHub 是**公共开源模板项目**，不包含任何私人信息。
->
-> - 所有文档中的路径、账号、人名等均为**占位符**
-> - 如果你看到类似 `your-server-ip`、`username`、`your-org` 等，请理解为占位符
-> - 如需使用，请基于模板创建你自己的配置
+**Linux / macOS / WSL:**
+```bash
+curl -fsSL https://raw.githubusercontent.com/xuanyuanluoxue/AgentHub/v0.1.0-beta.1/scripts/install.sh | bash -s -- --install
+```
+
+**Windows (PowerShell):**
+```powershell
+irm https://raw.githubusercontent.com/xuanyuanluoxue/AgentHub/v0.1.0-beta.1/scripts/install.ps1 | iex
+```
+
+安装后初始化：
+```bash
+cd ~/.agenthub && pip install -e . && agenthub init
+```
 
 ---
 
 ## 🎯 项目愿景
 
 当前 AI 开发工具（OpenClaw、OpenCode、ClawHub、Claude Code 等）各自为战：
-- Skill 无法互通，重复开发
-- Agent 每工具独立配置
-- 用户画像换工具就丢失
-- 记忆不持久，每次对话重新开始
 
-**AgentHub 致力于构建跨平台统一规范，实现四大共享生态。**
+- **Skill 无法互通** — 每换一个新工具，就要重新写一遍同样的 Skill
+- **Agent 每工具独立配置** — 在 OpenClaw 配置好的 Agent，换到 OpenCode 全部丢失
+- **用户画像换工具就丢失** — 花了时间训练的习惯、偏好，换个工具全没了
+- **记忆不持久** — 每次对话重新开始，AI 不记得你是谁
+
+**AgentHub 致力于构建跨平台统一规范，让 Skill / Agent / 画像 / 记忆真正实现跨工具共享。**
+
+一次配置，处处运行；一次记忆，持续有效。
 
 ---
 
@@ -48,16 +60,6 @@ skills/
 └── 50+ 共享 Skill
 ```
 
-**🚀 一键安装 ClawHub 商店 Skills（无需 API Key）：**
-```bash
-agenthub clawhub search github     # 搜索 Skills
-agenthub clawhub install github    # 安装到本地
-```
-
-[📖 Skill 规范 v2.0](./docs/design/skill-format.md)
-
----
-
 ### 2️⃣ 共享 Agent 库 — 专业角色，智能路由
 
 | 特性 | 说明 |
@@ -72,13 +74,8 @@ agents/
 ├── main-agent/             # 主路由入口
 ├── dev-agent/              # 开发专家
 ├── life-agent/             # 生活服务
-├── ops-agent/              # 运营助手
 └── productivity-agent/     # 效率工具
 ```
-
-[📖 Agent 规范 v1.0](./docs/agent-format.md)
-
----
 
 ### 3️⃣ 共享用户画像 — 工具无关，永久携带
 
@@ -97,10 +94,6 @@ profile/
 └── growth/                # 成长轨迹
 ```
 
-[📖 用户画像规范 v1.0](./docs/user-profile-spec.md)
-
----
-
 ### 4️⃣ 共享记忆系统 — 持久记忆，持续学习
 
 | 特性 | 说明 |
@@ -113,70 +106,16 @@ profile/
 ```
 memory/
 ├── short_term/            # 短期记忆（会话级）
-├── long_term/              # 长期记忆（持久化）
-├── knowledge/              # 知识库（结构化）
-└── retrieval/              # 检索引擎
-```
-
-[📖 记忆系统设计](./docs/memory-system.md)
-
----
-
-## 📁 目录结构
-
-```
-.agenthub/
-├── core/agenthub/          # Python 包
-│   ├── cli/                # CLI 命令
-│   └── core/               # Agent / Memory / Skill / Config
-├── docs/                   # 规范文档
-│   ├── skill-format.md     # ★ Skill 规范
-│   ├── agent-format.md     # ★ Agent 规范
-│   ├── user-profile-spec.md # ★ 用户画像规范
-│   └── memory-system.md    # ★ 记忆系统设计
-├── profile/                # ★ 用户画像
-├── agents/                 # ★ Agent 配置
-├── skills/                 # ★ Skill 示例
-└── skills-library/         # ★ 共享技能库
-```
-
----
-
-## 🚀 快速开始
-
-### 一键安装（推荐）
-
-**Windows (PowerShell):**
-```powershell
-irm https://raw.githubusercontent.com/xuanyuanluoxue/AgentHub/v0.1.0-beta.1/scripts/install.ps1 | iex
-```
-
-**Linux / macOS / WSL:**
-```bash
-curl -fsSL https://raw.githubusercontent.com/xuanyuanluoxue/AgentHub/v0.1.0-beta.1/scripts/install.sh | bash -s -- --install
-```
-
-安装完成后运行初始化：
-```bash
-cd ~/.agenthub
-pip install -e .
-agenthub init
-```
-
-### 手动安装
-
-```bash
-git clone https://github.com/xuanyuanluoxue/AgentHub.git ~/.agenthub
-cd ~/.agenthub
-pip install -e .
-agenthub init
+├── long_term/             # 长期记忆（持久化）
+├── knowledge/             # 知识库（结构化）
+└── retrieval/             # 检索引擎
 ```
 
 ---
 
 ## 🤖 AI 助手接入指南
 
-> 将以下内容复制给 AI 阅读，AI 即可自动接入 AgentHub 项目
+将以下内容复制给 AI 阅读：
 
 ```markdown
 # AgentHub 项目接入指南
@@ -216,7 +155,6 @@ path = os.path.expanduser("~/.agenthub/agents/registry.json")
 os.makedirs(os.path.dirname(path), exist_ok=True)
 reg = json.load(open(path)) if os.path.exists(path) else {"agents": {}}
 
-# 使用你自己的 Agent ID（格式：英文/数字/短横线）
 my_id = "my-agent-id"  # 替换为你的实际 ID
 if my_id not in reg["agents"]:
     reg["agents"][my_id] = {
@@ -227,7 +165,7 @@ if my_id not in reg["agents"]:
         "first_seen": datetime.utcnow().strftime("%Y-%m-%dT%H:%M:%SZ"),
         "last_active": datetime.utcnow().strftime("%Y-%m-%dT%H:%M:%SZ"),
         "capabilities": [],
-        "platform": "opencode",  # 根据你的平台填写
+        "platform": "opencode",
         "status": "active"
     }
     json.dump(reg, open(path,"w"), ensure_ascii=False, indent=2)
@@ -245,7 +183,6 @@ cat ~/.agenthub/profile/contacts/*.yaml 2>/dev/null || echo "暂无联系人"
 
 ### Step 4 — 了解记忆系统
 
-检查目录存在：
 ```bash
 ls ~/.agenthub/memory/short_term/ 2>/dev/null || echo "空"
 ls ~/.agenthub/memory/long_term/ 2>/dev/null || echo "空"
@@ -264,10 +201,9 @@ ls ~/.agenthub/memory/long_term/ 2>/dev/null || echo "空"
 |------|------|
 | `~/.agenthub/agents/registry.json` | Agent 注册表 |
 | `~/.agenthub/profile/identity.yaml` | 用户身份画像 |
-| `~/.agenthub/memory/short_term/` | 短期记忆（会话级） |
-| `~/.agenthub/memory/long_term/` | 长期记忆（持久化） |
+| `~/.agenthub/memory/short_term/` | 短期记忆 |
+| `~/.agenthub/memory/long_term/` | 长期记忆 |
 | `~/.agenthub/skills/` | 已安装 Skills |
-| `~/.agenthub/docs/` | 项目文档 |
 
 ## 详细文档
 
@@ -277,6 +213,26 @@ ls ~/.agenthub/memory/long_term/ 2>/dev/null || echo "空"
 - [记忆系统](./docs/design/memory-system.md) — 多层记忆架构
 
 **完成以上步骤后，你即可开始在 AgentHub 生态中工作。**
+```
+
+---
+
+## 📁 目录结构
+
+```
+.agenthub/
+├── core/agenthub/          # Python 包
+│   ├── cli/               # CLI 命令
+│   └── core/              # Agent / Memory / Skill / Config
+├── docs/                   # 规范文档
+│   ├── skill-format.md    # ★ Skill 规范
+│   ├── agent-format.md    # ★ Agent 规范
+│   ├── user-profile-spec.md # ★ 用户画像规范
+│   └── memory-system.md    # ★ 记忆系统设计
+├── profile/               # ★ 用户画像
+├── agents/                # ★ Agent 配置
+├── skills/                # ★ Skill 示例
+└── skills-library/        # ★ 共享技能库
 ```
 
 ---
@@ -297,10 +253,9 @@ ls ~/.agenthub/memory/long_term/ 2>/dev/null || echo "空"
 
 | 文档 | 说明 |
 |------|------|
-| [项目愿景](./docs/project/项目愿景.md) | 问题分析、解决方案、核心价值 |
 | [AI 使用指南](./docs/for-ai/AI_GUIDE.md) | **★ AI 助手必读** |
-| [Skill 规范](./docs/design/skill-format.md) | v2.0 规范详解 + 示例 |
-| [Agent 规范](./docs/design/agent-format.md) | v1.0 规范详解 + 示例 |
+| [Skill 规范](./docs/design/skill-format.md) | v2.0 规范详解 |
+| [Agent 规范](./docs/design/agent-format.md) | v1.0 规范详解 |
 | [用户画像规范](./docs/for-ai/user-profile-spec.md) | v1.0 规范详解 |
 | [记忆系统设计](./docs/design/memory-system.md) | 多层记忆架构 |
 
@@ -314,6 +269,15 @@ ls ~/.agenthub/memory/long_term/ 2>/dev/null || echo "空"
 | **生态互通** | 打破工具壁垒，自由切换 |
 | **知识沉淀** | Agent、Profile、Memory 共享，集体智慧 |
 | **持续学习** | 记忆持久化，AI 越用越懂你 |
+
+---
+
+## ⚠️ 隐私声明
+
+> AgentHub 是**公共开源模板项目**，不包含任何私人信息。
+>
+> - 所有文档中的路径、账号、人名等均为**占位符**
+> - 如需使用，请基于模板创建你自己的配置
 
 ---
 
