@@ -1,10 +1,14 @@
 #!/bin/bash
 # AgentHub 安装路由脚本
-# 自动检测操作系统并路由到对应安装脚本
+# 自动检测操作系统并路由到对应安装/卸载脚本
 #
 # 用法:
 #   curl -fsSL https://raw.githubusercontent.com/xuanyuanluoxue/AgentHub/main/scripts/install.sh | bash
 #   bash install.sh
+#
+# 卸载:
+#   curl -fsSL https://raw.githubusercontent.com/xuanyuanluoxue/AgentHub/main/scripts/install.sh | bash --uninstall
+#   bash install.sh --uninstall
 #
 
 set -e
@@ -98,6 +102,7 @@ is_installed() {
 download_and_run() {
     local url="$1"
     local name="$2"
+    shift 2
 
     echo -e "${DIM}正在下载 ${name}...${NC}"
 
@@ -129,9 +134,37 @@ download_and_run() {
 }
 
 # ============================================
+# 显示菜单
+# ============================================
+show_menu() {
+    echo -e "${BOLD}请选择操作:${NC}"
+    echo ""
+    echo "  ${CYAN}1${NC}. 安装 AgentHub"
+    echo "  ${CYAN}2${NC}. 卸载 AgentHub"
+    echo "  ${CYAN}3${NC}. 退出"
+    echo ""
+}
+
+# ============================================
 # 主流程
 # ============================================
 main() {
+    local action=""
+
+    # 解析参数
+    for arg in "$@"; do
+        case $arg in
+            --install|-i) action="install" ;;
+            --uninstall|-u) action="uninstall" ;;
+            --help|-h)
+                echo "用法: $0 [--install|--uninstall]"
+                echo "  --install, -i   安装"
+                echo "  --uninstall, -u 卸载"
+                exit 0
+                ;;
+        esac
+    done
+
     print_banner
 
     # 检测操作系统
@@ -141,51 +174,89 @@ main() {
     log_info "检测到操作系统: ${CYAN}${os_name}${NC}"
     echo ""
 
-    # 检查是否已安装
-    if is_installed; then
-        echo -e "${YELLOW}⚠  检测到已安装 AgentHub${NC}"
-        echo ""
+    # 如果没有指定操作，显示菜单
+    if [ -z "$action" ]; then
+        if is_installed; then
+            echo -e "${YELLOW}⚠  检测到已安装 AgentHub${NC}"
+            echo ""
+        fi
+
+        show_menu
 
         if [ -e /dev/tty ]; then
-            echo -n "  是否重新安装? [y/N]: "
-            read -n 1 -r < /dev/tty
+            echo -n "请输入选项 [1-3]: "
+            read -n 1 -r choice < /dev/tty
             echo ""
-            echo ""
-            if [[ ! $REPLY =~ ^[Yy]$ ]]; then
-                log_info "跳过安装"
-                echo ""
-                echo "  下一步:"
-                echo "    agenthub status"
-                echo ""
-                exit 0
-            fi
         else
-            log_warn "已安装，跳过安装"
+            echo -n "请输入选项 [1-3]: "
+            read -n 1 -r choice
             echo ""
-            exit 0
         fi
+        echo ""
+
+        case "$choice" in
+            1) action="install" ;;
+            2) action="uninstall" ;;
+            *) log_info "退出"; exit 0 ;;
+        esac
     fi
 
-    # 根据操作系统路由
+    # 执行操作
+    case "$action" in
+        install)
+            if is_installed; then
+                echo -e "${YELLOW}⚠  检测到已安装 AgentHub${NC}"
+                echo ""
+
+                if [ -e /dev/tty ]; then
+                    echo -n "  是否重新安装? [y/N]: "
+                    read -n 1 -r < /dev/tty
+                    echo ""
+                    echo ""
+                    if [[ ! $REPLY =~ ^[Yy]$ ]]; then
+                        log_info "跳过安装"
+                        exit 0
+                    fi
+                else
+                    log_warn "已安装，跳过安装"
+                    exit 0
+                fi
+            fi
+            ;;
+
+        uninstall)
+            case "$os_type" in
+                linux|macos)
+                    download_and_run \
+                        "https://raw.githubusercontent.com/xuanyuanluoxue/AgentHub/main/scripts/${os_type}/uninstall.sh" \
+                        "${os_name} 卸载脚本"
+                    exit 0
+                    ;;
+                windows)
+                    powershell -ExecutionPolicy Bypass -Command "irm https://raw.githubusercontent.com/xuanyuanluoxue/AgentHub/main/scripts/windows/uninstall.ps1 | iex"
+                    exit 0
+                    ;;
+                *)
+                    log_error "不支持的操作系统: $os_name"
+                    exit 1
+                    ;;
+            esac
+            ;;
+    esac
+
+    # 安装流程
     case "$os_type" in
-        linux)
-            log_info "正在启动 Linux 安装程序..."
+        linux|macos)
+            log_info "正在启动 ${os_name} 安装程序..."
             echo ""
             download_and_run \
-                "https://raw.githubusercontent.com/xuanyuanluoxue/AgentHub/main/scripts/linux/install.sh" \
-                "Linux 安装脚本"
+                "https://raw.githubusercontent.com/xuanyuanluoxue/AgentHub/main/scripts/${os_type}/install.sh" \
+                "${os_name} 安装脚本"
             ;;
         windows)
             log_info "正在启动 Windows 安装程序..."
             echo ""
             powershell -ExecutionPolicy Bypass -Command "irm https://raw.githubusercontent.com/xuanyuanluoxue/AgentHub/main/scripts/windows/install.ps1 | iex"
-            ;;
-        macos)
-            log_info "正在启动 macOS 安装程序..."
-            echo ""
-            download_and_run \
-                "https://raw.githubusercontent.com/xuanyuanluoxue/AgentHub/main/scripts/macos/install.sh" \
-                "macOS 安装脚本"
             ;;
         *)
             log_error "不支持的操作系统: $os_name"
@@ -196,4 +267,4 @@ main() {
     esac
 }
 
-main
+main "$@"
