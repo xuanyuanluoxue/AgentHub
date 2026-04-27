@@ -1,6 +1,10 @@
 # -*- coding: utf-8 -*-
 """
 Skill 解析器 - 解析 SKILL.md 文件
+
+支持两种格式：
+1. AgentHub 格式：顶级字段 (name, version, description, trigger)
+2. ClawHub 格式：metadata 嵌套字段
 """
 
 import re
@@ -18,82 +22,85 @@ class SkillParseError(Exception):
 class SkillParser:
     """
     SKILL.md 解析器
-    
+
     解析 Skill 的 YAML frontmatter 和 Markdown 正文
     """
-    
+
     FRONTMATTER_PATTERN = re.compile(
         r'^---\s*\n(.*?)\n---\s*\n(.*)$',
         re.DOTALL | re.MULTILINE
     )
-    
+
     @classmethod
     def parse_file(cls, path: str | Path) -> SkillMetadata:
         """
         解析 SKILL.md 文件
-        
+
         Args:
             path: SKILL.md 文件路径
-            
+
         Returns:
             SkillMetadata 对象
-            
+
         Raises:
             SkillParseError: 解析失败
         """
         path = Path(path)
-        
+
         if not path.exists():
             raise SkillParseError(f"文件不存在: {path}")
-        
+
         with open(path, 'r', encoding='utf-8') as f:
             content = f.read()
-        
+
         return cls.parse_content(content, base_path=str(path.parent))
-    
+
     @classmethod
     def parse_content(cls, content: str, base_path: Optional[str] = None) -> SkillMetadata:
         """
         解析 SKILL.md 内容
-        
+
         Args:
             content: SKILL.md 文件内容
             base_path: 基础路径（用于设置 path 字段）
-            
+
         Returns:
             SkillMetadata 对象
         """
         # 提取 frontmatter
         match = cls.FRONTMATTER_PATTERN.match(content.strip())
-        
+
         if not match:
             raise SkillParseError(
                 "无法解析 YAML frontmatter，"
                 "确保文件以 --- 开头和结尾"
             )
-        
+
         frontmatter_text = match.group(1)
         markdown_body = match.group(2).strip()
-        
+
         # 解析 YAML
         try:
             # 使用 safe_load 避免执行任意代码
             data = yaml.safe_load(frontmatter_text)
         except yaml.YAMLError as e:
             raise SkillParseError(f"YAML 解析失败: {e}")
-        
+
         if data is None:
             raise SkillParseError("YAML frontmatter 为空")
-        
+
         if not isinstance(data, dict):
             raise SkillParseError(f"YAML 应为字典类型，得到: {type(data)}")
-        
+
+        # 处理 ClawHub 格式 (metadata 嵌套)
+        data = cls._normalize_metadata(data)
+
         # 提取必需字段
         required_fields = ['name', 'version', 'description', 'trigger']
         for field in required_fields:
             if field not in data:
                 raise SkillParseError(f"缺少必需字段: {field}")
-        
+
         # 构建 SkillMetadata
         metadata = SkillMetadata(
             name=data.pop('name'),
@@ -104,8 +111,53 @@ class SkillParser:
             path=base_path,
             **{k: v for k, v in data.items() if v is not None}
         )
-        
+
         return metadata
+
+    @classmethod
+    def _normalize_metadata(cls, data: dict) -> dict:
+        """
+        规范化元数据，支持 ClawHub 格式
+
+        ClawHub 格式示例:
+        ---
+        name: hello-world
+        triggers:
+          - "hello"
+        metadata:
+          version: "1.0.0"
+          category: productivity
+        ---
+
+        转换为:
+        ---
+        name: hello-world
+        triggers: ["hello"]
+        version: "1.0.0"
+        category: productivity
+        ---
+        """
+        # 如果有 metadata 嵌套，提取到顶级
+        if 'metadata' in data and isinstance(data['metadata'], dict):
+            metadata = data.pop('metadata')
+            for key, value in metadata.items():
+                # 只填充顶级不存在的字段
+                if key not in data:
+                    data[key] = value
+
+        # 兼容 ClawHub 的 triggers（复数）vs AgentHub 的 trigger（单数）
+        if 'triggers' in data and 'trigger' not in data:
+            data['trigger'] = data.pop('triggers')
+
+        # 处理 trigger/triggers 可能是字符串的情况
+        if 'trigger' in data:
+            if isinstance(data['trigger'], str):
+                data['trigger'] = [data['trigger']]
+            # 如果是空数组，设为默认空数组（后续可设置默认值）
+            if not data['trigger']:
+                data['trigger'] = []
+
+        return data
     
     @classmethod
     def parse_directory(cls, dir_path: str | Path) -> SkillMetadata:

@@ -86,30 +86,32 @@ class SkillMetadata:
     def validate(self) -> tuple[bool, list[str]]:
         """
         验证元数据是否合法
-        
+
         Returns:
             (is_valid, errors)
         """
         errors = []
-        
+
         # name: 非空，kebab-case
         if not self.name:
             errors.append("name 不能为空")
         elif not re.match(r'^[a-z0-9][a-z0-9-]*$', self.name):
             errors.append(f"name 格式错误：{self.name}，应为 kebab-case")
-        
+
         # version: SemVer 格式
-        if not re.match(r'^\d+\.\d+\.\d+(-[\w.]+)?(\+[\w.]+)?$', self.version):
+        if not self.version:
+            errors.append("version 不能为空")
+        elif not re.match(r'^\d+\.\d+\.\d+(-[\w.]+)?(\+[\w.]+)?$', self.version):
             errors.append(f"version 格式错误：{self.version}，应为 SemVer")
-        
+
         # description: 非空
         if not self.description:
             errors.append("description 不能为空")
-        
-        # trigger: 非空
-        if not self.trigger:
-            errors.append("trigger 不能为空")
-        
+
+        # trigger: 可为空（ClawHub 兼容）
+        # if not self.trigger:
+        #     errors.append("trigger 不能为空")
+
         return (len(errors) == 0, errors)
     
     def to_dict(self) -> dict:
