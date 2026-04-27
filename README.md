@@ -38,6 +38,7 @@
 | **跨平台兼容** | OpenClaw / OpenCode / ClawHub / Hermes 通用 |
 | **依赖管理** | SemVer 版本控制，自动解析依赖 |
 | **触发词机制** | 智能匹配用户输入，自动加载 Skill |
+| **云端市场** | 无需 API Key，直接安装 ClawHub 商店 Skills |
 
 ```
 skills/
@@ -47,7 +48,13 @@ skills/
 └── 50+ 共享 Skill
 ```
 
-[📖 Skill 规范 v2.0](./docs/skill-format.md)
+**🚀 一键安装 ClawHub 商店 Skills（无需 API Key）：**
+```bash
+agenthub clawhub search github     # 搜索 Skills
+agenthub clawhub install github    # 安装到本地
+```
+
+[📖 Skill 规范 v2.0](./docs/design/skill-format.md)
 
 ---
 
@@ -193,12 +200,12 @@ agenthub profile validate   # 验证配置
 
 | 文档 | 说明 |
 |------|------|
-| [项目愿景](./docs/项目愿景.md) | 问题分析、解决方案、核心价值 |
-| [AI 使用指南](./docs/AI_GUIDE.md) | **★ AI 助手必读** |
-| [Skill 规范](./docs/skill-format.md) | v2.0 规范详解 + 示例 |
-| [Agent 规范](./docs/agent-format.md) | v1.0 规范详解 + 示例 |
-| [用户画像规范](./docs/user-profile-spec.md) | v1.0 规范详解 |
-| [记忆系统设计](./docs/memory-system.md) | 多层记忆架构 |
+| [项目愿景](./docs/project/项目愿景.md) | 问题分析、解决方案、核心价值 |
+| [AI 使用指南](./docs/for-ai/AI_GUIDE.md) | **★ AI 助手必读** |
+| [Skill 规范](./docs/design/skill-format.md) | v2.0 规范详解 + 示例 |
+| [Agent 规范](./docs/design/agent-format.md) | v1.0 规范详解 + 示例 |
+| [用户画像规范](./docs/for-ai/user-profile-spec.md) | v1.0 规范详解 |
+| [记忆系统设计](./docs/design/memory-system.md) | 多层记忆架构 |
 
 ---
 
