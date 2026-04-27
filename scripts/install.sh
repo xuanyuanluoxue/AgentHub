@@ -127,9 +127,9 @@ download_and_run() {
 show_menu() {
     echo "  请选择操作:"
     echo ""
-    echo "    [${GREEN}1${NC}] 安装 AgentHub"
-    echo "    [${YELLOW}2${NC}] 卸载 AgentHub"
-    echo "    [${DIM}3${NC}] 退出"
+    echo -e "    ${GREEN}[1]${NC} 安装 AgentHub"
+    echo -e "    ${YELLOW}[2]${NC} 卸载 AgentHub"
+    echo -e "    ${DIM}[3]${NC} 退出"
     echo ""
 }
 
@@ -137,19 +137,9 @@ show_menu() {
 # 读取用户选择
 # ============================================
 get_choice() {
-    local prompt="  请输入选项 [1-3]: "
-    local choice=""
-
-    if [ -e /dev/tty ]; then
-        echo -n "$prompt"
-        read -n 1 choice < /dev/tty
-        echo ""
-    else
-        echo -n "$prompt"
-        read -n 1 choice
-        echo ""
-    fi
-
+    echo -n "  请输入选项 [1-3]: "
+    read choice
+    echo ""
     echo "$choice"
 }
 
@@ -188,7 +178,6 @@ main() {
 
         show_menu
         local choice=$(get_choice)
-        echo ""
 
         case "$choice" in
             1) action="install" ;;
@@ -203,17 +192,11 @@ main() {
                 echo -e "  ${YELLOW}! 检测到已安装 AgentHub${NC}"
                 echo ""
 
-                if [ -e /dev/tty ]; then
-                    echo -n "  是否重新安装? [y/N]: "
-                    read -n 1 -r < /dev/tty
-                    echo ""
-                    echo ""
-                    if [[ ! $REPLY =~ ^[Yy]$ ]]; then
-                        log_info "跳过安装"
-                        exit 0
-                    fi
-                else
-                    log_warn "已安装，跳过安装"
+                echo -n "  是否重新安装? [y/N]: "
+                read -r REPLY
+                echo ""
+                if [[ ! $REPLY =~ ^[Yy]$ ]]; then
+                    log_info "跳过安装"
                     exit 0
                 fi
             fi
