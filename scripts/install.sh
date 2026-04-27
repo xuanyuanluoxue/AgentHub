@@ -148,6 +148,15 @@ backup_existing() {
         echo -e "${BOLD}▸ 备份现有配置${NC}"
         print_divider
         log_warn "发现已存在的 AgentHub 配置"
+
+        # 非交互模式自动跳过备份
+        if [ ! -t 0 ]; then
+            log_info "非交互模式，自动跳过备份"
+            rm -rf "${INSTALL_DIR}"
+            echo ""
+            return 0
+        fi
+
         echo -n "  是否备份? ${CYAN}[y/N]${NC}: "
         read -n 1 -r
         echo ""
