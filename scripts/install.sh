@@ -1,32 +1,22 @@
 #!/bin/bash
-# AgentHub 安装路由脚本
+# AgentHub 一键安装脚本 (单文件版)
 #
 set -e
 
-# ============================================
-# 颜色定义
-# ============================================
 RED='\033[0;31m'
 GREEN='\033[0;32m'
 YELLOW='\033[1;33m'
 BLUE='\033[0;34m'
 CYAN='\033[0;36m'
-MAGENTA='\033[0;35m'
 BOLD='\033[1m'
 DIM='\033[2m'
 NC='\033[0m'
 
-# ============================================
-# 日志
-# ============================================
-log_info() { echo -e "${BLUE}>${NC} $1"; }
-log_success() { echo -e "${GREEN}✓${NC} $1"; }
-log_warn() { echo -e "${YELLOW}!${NC} $1"; }
-log_error() { echo -e "${RED}x${NC} $1"; }
+log_info() { echo -e "  ${BLUE}>${NC} $1"; }
+log_success() { echo -e "  ${GREEN}✓${NC} $1"; }
+log_warn() { echo -e "  ${YELLOW}!${NC} $1"; }
+log_error() { echo -e "  ${RED}x${NC} $1"; }
 
-# ============================================
-# Banner
-# ============================================
 print_banner() {
     echo ""
     echo -e "  ${GREEN}    _                    _   _   _       _     ${NC}"
@@ -41,130 +31,217 @@ print_banner() {
     echo ""
 }
 
-# ============================================
-# 检测操作系统
-# ============================================
 detect_os() {
-    local os_name=""
-    local os_type=""
-
     case "$(uname -s)" in
         Linux*)
             if grep -qiE "(microsoft|wsl)" /proc/version 2>/dev/null; then
-                os_name="WSL"
-                os_type="linux"
+                echo "linux:wsl"
             elif [ -d "/data/data/com.termux/files/home" ]; then
-                os_name="Termux"
-                os_type="linux"
+                echo "linux:termux"
             else
-                os_name="Linux"
-                os_type="linux"
+                echo "linux:linux"
             fi
             ;;
         Darwin*)
-            os_name="macOS"
-            os_type="macos"
+            echo "macos:macos"
             ;;
         CYGWIN*|MINGW*|MSYS*)
-            os_name="Windows"
-            os_type="windows"
+            echo "windows:windows"
             ;;
         *)
-            os_name="$(uname -s)"
-            os_type="unknown"
+            echo "unknown:$(uname -s)"
             ;;
     esac
-
-    echo "$os_type"
-    echo "$os_name"
 }
 
-# ============================================
-# 检测是否为已安装
-# ============================================
 is_installed() {
-    if [ -d "${HOME}/.agenthub" ] && [ -f "${HOME}/.agenthub/pyproject.toml" ]; then
-        return 0
-    fi
-    return 1
+    [ -d "${HOME}/.agenthub" ] && [ -f "${HOME}/.agenthub/pyproject.toml" ]
 }
 
-# ============================================
-# 下载并执行子脚本
-# ============================================
-download_and_run() {
-    local url="$1"
-    local name="$2"
-    shift 2
-
-    echo -e "  ${DIM}正在下载 ${name}...${NC}"
-
-    local content
-    content=$(curl -fsSL --connect-timeout 15 --max-time 60 "$url" 2>&1) || {
-        local err=$?
-        echo ""
-        log_error "下载失败 (错误码: $err)"
-        echo ""
-        echo -e "  ${YELLOW}可能的原因:${NC}"
-        echo "    1. 网络连接不稳定"
-        echo "    2. DNS 解析失败"
-        echo "    3. 该网络环境限制了对 GitHub 的访问"
-        echo ""
-        echo -e "  ${CYAN}解决方案:${NC}"
-        echo "    1. 稍后重试"
-        echo "    2. 切换到手机热点或其他网络"
-        echo "    3. 使用 VPN"
-        echo "    4. 直接克隆: git clone https://github.com/xuanyuanluoxue/AgentHub.git ~/.agenthub"
-        echo ""
-        exit 1
-    }
-
-    echo -e "  ${GREEN}下载成功${NC}"
+confirm_reinstall() {
+    echo -n "  是否重新安装? [y/N]: "
+    read -r reply
     echo ""
-
-    bash -c "$content" -- "$@"
+    [[ $reply =~ ^[Yy]$ ]]
 }
 
-# ============================================
-# 显示菜单
-# ============================================
-show_menu() {
-    echo "  请选择操作:"
-    echo ""
-    echo -e "    ${GREEN}[1]${NC} 安装 AgentHub"
-    echo -e "    ${YELLOW}[2]${NC} 卸载 AgentHub"
-    echo -e "    ${DIM}[3]${NC} 退出"
-    echo ""
-}
-
-# ============================================
-# 读取用户选择
-# ============================================
-get_choice() {
-    echo -n "  请输入选项 [1-3]: "
-    read -r choice
-    echo ""
-    echo "$choice"
-}
-
-# ============================================
-# 主流程
-# ============================================
 print_usage() {
     echo ""
     echo -e "  ${CYAN}用法:${NC}"
-    echo "    $0              # 交互式菜单"
+    echo "    $0              # 交互式安装（菜单）"
     echo "    $0 --install    # 非交互式安装"
     echo "    $0 --uninstall  # 非交互式卸载"
     echo "    $0 --help       # 显示帮助"
     echo ""
-    echo -e "  ${DIM}管道模式示例:${NC}"
+    echo -e "  ${DIM}管道模式:${NC}"
     echo "    curl -fsSL .../install.sh | bash -- --install"
     echo ""
 }
 
+# ========================================
+# Linux/macOS 安装
+# ========================================
+do_linux_install() {
+    local install_dir="${HOME}/.agenthub"
+    local repo_url="https://github.com/xuanyuanluoxue/AgentHub.git"
+
+    echo -e "  ${DIM}▸ 准备安装到 ${install_dir}${NC}"
+    echo ""
+
+    if is_installed; then
+        echo -e "  ${YELLOW}! 检测到已安装 AgentHub${NC}"
+        echo ""
+        if ! confirm_reinstall; then
+            log_info "跳过安装"
+            return 0
+        fi
+        echo -e "  ${DIM}▸ 重新安装中...${NC}"
+    fi
+
+    echo -e "  ${DIM}▸ 检查依赖...${NC}"
+    local missing=()
+    for cmd in git curl; do
+        if ! command -v $cmd &>/dev/null; then
+            missing+=($cmd)
+        fi
+    done
+    if [ ${#missing[@]} -gt 0 ]; then
+        log_error "缺少依赖: ${missing[*]}"
+        echo "  请先安装: sudo apt install ${missing[*]}"
+        return 1
+    fi
+    echo -e "  ${GREEN}✓ 依赖检查通过${NC}"
+    echo ""
+
+    if [ -d "$install_dir" ]; then
+        log_info "更新现有安装..."
+        cd "$install_dir"
+        git pull origin main 2>/dev/null || git pull origin master 2>/dev/null
+    else
+        log_info "克隆仓库..."
+        git clone --depth 1 "$repo_url" "$install_dir"
+    fi
+
+    echo ""
+    log_success "安装完成!"
+    echo ""
+    echo -e "  ${DIM}下一步:${NC}"
+    echo "    cd $install_dir"
+    echo "    pip install -e ."
+    echo "    agenthub init"
+    echo ""
+}
+
+do_linux_uninstall() {
+    local install_dir="${HOME}/.agenthub"
+
+    echo ""
+    echo -e "  ${RED}⚠ 确认卸载 AgentHub${NC}"
+    echo "    目录: $install_dir"
+    echo ""
+
+    echo -n "  此操作不可恢复，是否继续? [y/N]: "
+    read -r reply
+    echo ""
+
+    if [[ ! $reply =~ ^[Yy]$ ]]; then
+        log_info "取消卸载"
+        return 0
+    fi
+
+    if [ -d "$install_dir" ]; then
+        rm -rf "$install_dir"
+        log_success "卸载完成"
+    else
+        log_warn "未检测到安装目录"
+    fi
+}
+
+# ========================================
+# Windows 安装
+# ========================================
+do_windows_install() {
+    local install_dir="$HOME\.agenthub"
+
+    echo -e "  ${DIM}▸ 准备安装到 ${install_dir}${NC}"
+    echo ""
+
+    if (Test-Path "$install_dir\pyproject.toml") {
+        echo -e "  ${YELLOW}! 检测到已安装 AgentHub${NC}"
+        echo ""
+        if (-not $ForceReinstall) {
+            echo -n "  是否重新安装? [y/N]: "
+            $reply = Read-Host
+            echo ""
+            if ($reply -notmatch "^[Yy]$") {
+                log_info "跳过安装"
+                return 0
+            }
+        }
+        echo -e "  ${DIM}▸ 重新安装中...${NC}"
+    }
+
+    echo -e "  ${DIM}▸ 检查依赖...${NC}"
+    $hasGit = Get-Command git -ErrorAction SilentlyContinue
+    $hasCurl = Get-Command curl -ErrorAction SilentlyContinue
+    if (-not $hasGit -or -not $hasCurl) {
+        log_error "缺少依赖"
+        return 1
+    }
+    echo -e "  ${GREEN}✓ 依赖检查通过${NC}"
+    echo ""
+
+    if (Test-Path $install_dir) {
+        log_info "更新现有安装..."
+        Set-Location $install_dir
+        git pull origin main 2>$null
+    } else {
+        log_info "克隆仓库..."
+        git clone --depth 1 "https://github.com/xuanyuanluoxue/AgentHub.git" $install_dir
+    }
+
+    echo ""
+    log_success "安装完成!"
+    echo ""
+    echo -e "  ${DIM}下一步:${NC}"
+    echo "    cd $install_dir"
+    echo "    pip install -e ."
+    echo "    agenthub init"
+    echo ""
+}
+
+do_windows_uninstall() {
+    local install_dir="$HOME\.agenthub"
+
+    echo ""
+    echo -e "  ${RED}⚠ 确认卸载 AgentHub${NC}"
+    echo "    目录: $install_dir"
+    echo ""
+
+    echo -n "  此操作不可恢复，是否继续? [y/N]: "
+    $reply = Read-Host
+    echo ""
+
+    if ($reply -notmatch "^[Yy]$") {
+        log_info "取消卸载"
+        return 0
+    }
+
+    if (Test-Path $install_dir) {
+        Remove-Item -Recurse -Force $install_dir
+        log_success "卸载完成"
+    } else {
+        log_warn "未检测到安装目录"
+    }
+}
+
+# ========================================
+# 主流程
+# ========================================
 main() {
     local action=""
+    local os_type=""
+    local os_name=""
 
     for arg in "$@"; do
         case $arg in
@@ -180,8 +257,9 @@ main() {
 
     print_banner
 
-    local os_type=$(detect_os | head -1)
-    local os_name=$(detect_os | tail -1)
+    local os_info=$(detect_os)
+    os_type="${os_info%%:*}"
+    os_name="${os_info##*:}"
 
     log_info "检测到操作系统: ${CYAN}${os_name}${NC}"
     echo ""
@@ -194,13 +272,15 @@ main() {
             exit 1
         fi
 
-        if is_installed; then
-            echo -e "  ${YELLOW}! 检测到已安装 AgentHub${NC}"
-            echo ""
-        fi
-
-        show_menu
-        local choice=$(get_choice)
+        echo "  请选择操作:"
+        echo ""
+        echo -e "    ${GREEN}[1]${NC} 安装 AgentHub"
+        echo -e "    ${YELLOW}[2]${NC} 卸载 AgentHub"
+        echo -e "    ${DIM}[3]${NC} 退出"
+        echo ""
+        echo -n "  请输入选项 [1-3]: "
+        read -r choice
+        echo ""
 
         case "$choice" in
             1) action="install" ;;
@@ -212,59 +292,18 @@ main() {
 
     case "$action" in
         install)
-            if is_installed; then
-                echo -e "  ${YELLOW}! 检测到已安装 AgentHub${NC}"
-                echo ""
-                echo -n "  是否重新安装? [y/N]: "
-                read -r reply
-                echo ""
-                if [[ ! $reply =~ ^[Yy]$ ]]; then
-                    log_info "跳过安装"
-                    exit 0
-                fi
-            fi
-            ;;
-
-        uninstall)
             case "$os_type" in
-                linux|macos)
-                    log_info "正在启动 ${os_name} 卸载程序..."
-                    download_and_run \
-                        "https://raw.githubusercontent.com/xuanyuanluoxue/AgentHub/main/scripts/${os_type}/uninstall.sh" \
-                        "${os_name} 卸载脚本"
-                    exit 0
-                    ;;
-                windows)
-                    log_info "正在启动 Windows 卸载程序..."
-                    powershell -ExecutionPolicy Bypass -Command "irm https://raw.githubusercontent.com/xuanyuanluoxue/AgentHub/main/scripts/windows/uninstall.ps1 | iex"
-                    exit 0
-                    ;;
-                *)
-                    log_error "不支持的操作系统: $os_name"
-                    exit 1
-                    ;;
+                linux|macos) do_linux_install ;;
+                windows) do_windows_install ;;
+                *) log_error "不支持的操作系统: $os_name"; exit 1 ;;
             esac
             ;;
-    esac
-
-    case "$os_type" in
-        linux|macos)
-            log_info "正在启动 ${os_name} 安装程序..."
-            echo ""
-            download_and_run \
-                "https://raw.githubusercontent.com/xuanyuanluoxue/AgentHub/main/scripts/${os_type}/install.sh" \
-                "${os_name} 安装脚本"
-            ;;
-        windows)
-            log_info "正在启动 Windows 安装程序..."
-            echo ""
-            powershell -ExecutionPolicy Bypass -Command "irm https://raw.githubusercontent.com/xuanyuanluoxue/AgentHub/main/scripts/windows/install.ps1 | iex"
-            ;;
-        *)
-            log_error "不支持的操作系统: $os_name"
-            echo ""
-            echo "  请手动安装: https://github.com/xuanyuanluoxue/AgentHub"
-            exit 1
+        uninstall)
+            case "$os_type" in
+                linux|macos) do_linux_uninstall ;;
+                windows) do_windows_uninstall ;;
+                *) log_error "不支持的操作系统: $os_name"; exit 1 ;;
+            esac
             ;;
     esac
 }
