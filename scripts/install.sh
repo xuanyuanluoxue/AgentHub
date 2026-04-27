@@ -113,30 +113,44 @@ print_banner() {
 }
 
 # ============================================
-# 确认提示
+# 确认提示（优先使用 /dev/tty，管道时也能询问）
 # ============================================
 confirm() {
     local message="$1"
     local default="${2:-N}"
 
-    # 如果不是交互式终端，且没有强制参数，使用默认值
-    if [ "$INTERACTIVE" = false ]; then
+    # 如果有 -y 参数，直接确认
+    if [ "$FORCE_REINSTALL" = true ]; then
+        return 0
+    fi
+
+    # 尝试使用 /dev/tty 读取（管道模式下也能询问）
+    if [ -t 0 ] && [ -e /dev/tty ]; then
+        # 标准终端输入
+        if [ "$default" = "Y" ]; then
+            echo -n "$message [Y/n]: "
+        else
+            echo -n "$message [y/N]: "
+        fi
+        read -n 1 -r < /dev/tty
+        echo ""
+    elif [ -e /dev/tty ]; then
+        # 管道模式，但有 /dev/tty 可用
+        if [ "$default" = "Y" ]; then
+            echo -n "$message [Y/n]: "
+        else
+            echo -n "$message [y/N]: "
+        fi
+        read -n 1 -r < /dev/tty
+        echo ""
+    else
+        # 完全无法询问，使用默认值
         if [ "$default" = "Y" ]; then
             return 0
         else
             return 1
         fi
     fi
-
-    # 交互模式，显示提示
-    if [ "$default" = "Y" ]; then
-        echo -n "$message [Y/n]: "
-    else
-        echo -n "$message [y/N]: "
-    fi
-
-    read -n 1 -r
-    echo ""
 
     if [[ $REPLY =~ ^[Yy]$ ]] || [[ -z $REPLY && "$default" == "Y" ]]; then
         return 0
