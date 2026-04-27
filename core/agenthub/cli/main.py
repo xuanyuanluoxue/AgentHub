@@ -17,7 +17,7 @@ sys.path.insert(0, str(project_root / "core"))
 import click
 from typing import Optional
 
-from agenthub.cli.commands import skill_cmd, agent_cmd, task_cmd, registry_cmd
+from agenthub.cli.commands import skill_cmd, agent_cmd, task_cmd, registry_cmd, clawhub
 
 
 @click.group()
@@ -415,6 +415,7 @@ cli.add_command(skill_cmd, name="skill")
 cli.add_command(agent_cmd, name="agent")
 cli.add_command(task_cmd, name="task")
 cli.add_command(registry_cmd, name="registry")
+cli.add_command(clawhub, name="clawhub")
 
 
 def main():
