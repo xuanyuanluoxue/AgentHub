@@ -288,3 +288,32 @@ MIT License
 ---
 
 *愿景驱动，代码落地。*
+
+---
+
+## 📋 TODO / 开发计划
+
+### 🔜 v0.2.0 — GitHub 远程模式
+
+**目标：** 在私人项目分支上实现真正的跨工具共享
+
+**场景：**
+- 用户 A 在私人仓库创建 `agenthub-share` 分支
+- 通过 SSH / Personal Access Token 授权
+- 任意 AI 工具（OpenClaw / OpenCode / Claude Code 等）均可读写该分支的 Skill / Agent / Profile
+- 实现真正的「私人控制，公开共享」
+
+**实现思路：**
+
+| 组件 | 说明 |
+|------|------|
+| **分支协议** | Git push/pull 代替本地文件操作 |
+| **权限模型** | SSH Key 或 GitHub Token 授权 |
+| **冲突处理** | 多个工具同时修改时的合并策略 |
+| **同步机制** | 每次会话开始拉取最新，结束时推送变更 |
+
+**设计要点：**
+- `~/.agenthub/remote.yaml` — 配置远程仓库 URL + 认证信息
+- `agenthub sync` — 手动同步远程分支
+- 自动同步（可选）— 每次 Agent 启动/退出时自动 pull/push
+- 不依赖任何云服务，纯粹 Git 操作
