@@ -1,6 +1,56 @@
 # AgentHub AI 使用指南
 
-> 版本: v2.0 | 更新: 2026-04-27
+> ⚠️ **AI 必读** | 版本: v2.1 | 更新: 2026-04-27
+> **首次使用本项目前，必须先完成下方「快速初始化」步骤！**
+
+---
+
+## 🚀 快速初始化（30秒完成）
+
+任何 AI 首次启动时，**立即执行**以下三步，禁止跳过：
+
+### Step 1 — 注册自己
+
+读取 `~/.agenthub/agents/registry.json`，若自己未在其中，执行注册：
+
+```python
+import json, os
+from datetime import datetime
+
+path = os.path.expanduser("~/.agenthub/agents/registry.json")
+os.makedirs(os.path.dirname(path), exist_ok=True)
+reg = json.load(open(path)) if os.path.exists(path) else {"agents": {}}
+
+my_id = "your-agent-id"  # 改为你自己的 ID
+if my_id not in reg["agents"]:
+    reg["agents"][my_id] = {
+        "id": my_id, "signature": f"[{my_id}]", "display_name": "Your Name",
+        "type": "general", "first_seen": datetime.utcnow().strftime("%Y-%m-%dT%H:%M:%SZ"),
+        "last_active": datetime.utcnow().strftime("%Y-%m-%dT%H:%M:%SZ"),
+        "capabilities": [], "platform": "unknown", "status": "active"
+    }
+    json.dump(reg, open(path,"w"), ensure_ascii=False, indent=2)
+    print(f"[{my_id}] 注册成功")
+else:
+    print(f"[{my_id}] 已注册")
+```
+
+### Step 2 — 读取用户画像
+
+```bash
+cat ~/.agenthub/profile/identity.yaml
+cat ~/.agenthub/profile/health/身体.md
+```
+
+### Step 3 — 确认记忆系统
+
+检查以下目录存在：`~/.agenthub/memory/`、`~/.agenthub/agents/`、`~/.agenthub/profile/`
+
+**完成后才能开始工作。** 详见 `agents/onboarding-protocol.md`。
+
+---
+
+> 版本: v2.1 | 更新: 2026-04-27
 > 本文档供 AI 助手阅读，了解如何使用 AgentHub 框架。
 
 ---
