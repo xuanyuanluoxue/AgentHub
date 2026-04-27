@@ -146,7 +146,7 @@ get_choice() {
     if [ -t 0 ]; then
         read -r choice
     else
-        read -r choice </dev/tty 2>/dev/null || choice="1"
+        read -r choice </dev/tty 2>/dev/null
     fi
     echo ""
     echo "$choice"
@@ -203,9 +203,14 @@ main() {
                 echo ""
 
                 echo -n "  是否重新安装? [y/N]: "
-                read -r REPLY
+                local reply=""
+                if [ -t 0 ]; then
+                    read -r reply
+                else
+                    read -r reply </dev/tty 2>/dev/null
+                fi
                 echo ""
-                if [[ ! $REPLY =~ ^[Yy]$ ]]; then
+                if [[ ! $reply =~ ^[Yy]$ ]]; then
                     log_info "跳过安装"
                     exit 0
                 fi
