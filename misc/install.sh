@@ -82,6 +82,9 @@ print_usage() {
     echo "    5 - 打开配置目录"
     echo "    6 - 退出"
     echo ""
+    echo -e "  ${YELLOW}提示: 管道模式下无法交互，请用以下方式:${NC}"
+    echo "    curl -fsSL https://.../install.sh -o /tmp/install.sh && bash /tmp/install.sh"
+    echo ""
 }
 
 do_install() {

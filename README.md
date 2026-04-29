@@ -92,7 +92,7 @@ memory/
 ### 一键安装（推荐）
 
 ```bash
-curl -fsSL https://raw.githubusercontent.com/xuanyuanluoxue/AgentHub/main/misc/install.sh | bash
+curl -fsSL https://raw.githubusercontent.com/xuanyuanluoxue/AgentHub/main/misc/install.sh -o /tmp/install.sh && bash /tmp/install.sh
 ```
 
 运行后显示菜单，选择操作：
