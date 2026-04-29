@@ -35,22 +35,10 @@
                       humanizer、browser-use
 ```
 
-## 知识库路径路由
-
-| 路径 | Agent |
-|------|-------|
-| `~/projects/web/` | ops-agent |
-| `~/projects/android/` | dev-agent |
-| `~/projects/weapp/` | dev-agent |
-| `~/knowledge/school/` | life-agent |
-| `~/knowledge/personal/` | life-agent |
-| `~/knowledge/work/` | ops-agent |
-
 ## Skill 查找优先级
 
-1. `skills/` - 共享 Skill 库
-2. `~/.hermes/skills/` - 本地
-3. 项目 `.codex/skills/` - 项目自定义
+1. `skills/` - AgentHub 共享 Skill 库
+2. 项目自定义 Skill 目录
 
 ## Agent 间通信
 
@@ -59,7 +47,7 @@
 - 共享技能: `skills/`
 
 ### 任务交接格式
-见 `docs/task-handoff.md`
+交接文档存放于 `projects/templates/task.md`
 
 ## 约束规则
 

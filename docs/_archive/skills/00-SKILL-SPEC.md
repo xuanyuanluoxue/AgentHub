@@ -1,12 +1,12 @@
 # Skill 规范文档 v2.0
 
-> 版本: v2.0 | 更新: 2026-04-29 | AgentHub Skill 编写标准
+> 版本: v2.0 | 更新: 2026-04-27 | 对齐 OpenCode/ClawHub 社区规范
 
 ---
 
 ## 1. 概述
 
-Skill 是 AgentHub 的核心扩展单元，每个 Skill 是一个**自包含的功能模块**，可被多个 AI 工具共享使用。
+Skill 是 AI Agent 的核心扩展单元，每个 Skill 是一个**自包含的功能模块**。本规范对齐 OpenCode/ClawHub 社区格式，同时保留 xavier 特有的父子 Skill 结构。
 
 ---
 
@@ -24,7 +24,7 @@ skill-name/
 └── assets/                      # 资源文件（可选）
 ```
 
-### 2.2 父 Skill（带子 Skill）
+### 2.2 父 Skill（带子 Skill）— xavier 扩展
 
 ```
 parent-skill/
@@ -56,7 +56,11 @@ parent-skill/
 ---
 name: skill-name                  # ★ 必需：英文 kebab-case，唯一
 description: 简短描述              # ★ 必需：一句话说明
-triggers:                         # ★ 必需：触发词数组
+description_zh: "中文描述"         # 可选：中文描述
+description_en: "English desc"    # 可选：英文描述
+license: MIT                      # 可选：许可证
+compatibility: opencode           # 可选：兼容平台
+triggers:                         # ★ 必需：触发词数组（复数）
   - "触发词1"
   - "触发词2"
 metadata:
@@ -64,6 +68,11 @@ metadata:
   category: dev                  # 分类
   sources:                       # 参考资料（可选）
     - source1
+    - source2
+category: dev|life|ops|system|productivity  # xavier 分类（可选）
+children:                         # 父 Skill 填写（xavier 扩展）
+  - child-skill-1
+parent: parent-skill             # 子 Skill 填写（xavier 扩展）
 ---
 ```
 
@@ -73,28 +82,36 @@ metadata:
 |------|------|------|
 | `name` | string | Skill 名称，英文 kebab-case，唯一 |
 | `description` | string | 一句话简短描述 |
-| `triggers` | string[] | 触发词数组，AI 根据触发词决定加载哪个 Skill |
+| `triggers` | string[] | 触发词数组（复数），AI 根据触发词决定加载哪个 Skill |
 
-### 3.3 可选字段
+### 3.3 可选字段（社区标准）
 
 | 字段 | 类型 | 说明 |
 |------|------|------|
 | `description_zh` | string | 中文描述 |
 | `description_en` | string | 英文描述 |
 | `license` | string | 许可证，如 `MIT`、`Apache-2.0` |
-| `metadata.version` | string | SemVer 版本 |
-| `metadata.category` | string | 分类：`dev`, `life`, `ops`, `system`, `productivity` |
+| `compatibility` | string | 兼容平台，如 `opencode` |
+| `metadata.version` | string | SemVer 版本，如 `1.0.0` |
+| `metadata.category` | string | 分类 |
 | `metadata.sources` | string[] | 参考资料列表 |
+
+### 3.4 xavier 扩展字段
+
+| 字段 | 类型 | 说明 |
+|------|------|------|
+| `category` | enum | xavier 分类：`dev`, `life`, `ops`, `system`, `productivity` |
 | `children` | string[] | 子 Skill 名称列表（父 Skill 填写） |
 | `parent` | string | 父 Skill 名称（子 Skill 填写） |
 | `tags` | string[] | 标签数组，用于搜索 |
 | `dependencies` | string[] | 依赖的其他 Skill（格式：`name@version`） |
 | `tools` | string[] | 依赖的系统工具 |
 | `platform` | enum | 支持平台：`windows`, `linux`, `macos`, `all` |
+| `author` | string | 作者名 |
 
 ---
 
-## 4. 父子 Skill 结构
+## 4. 父子 Skill 结构（xavier 扩展）
 
 ### 4.1 设计原则
 
@@ -103,7 +120,7 @@ metadata:
 3. **子 Skill 可独立使用** — 子 Skill 也可以被独立触发
 4. **共享资源放父目录** — 多个子 Skill 共用的脚本、模板放父目录
 
-### 4.2 父 Skill 示例
+### 4.2 父 Skill
 
 ```yaml
 ---
@@ -121,7 +138,7 @@ children:
 ---
 ```
 
-### 4.3 子 Skill 示例
+### 4.3 子 Skill
 
 ```yaml
 ---
@@ -141,6 +158,8 @@ parent: android
 
 ## 5. 分类规范
 
+### 5.1 xavier 分类
+
 | 分类 | 说明 | 示例 |
 |------|------|------|
 | `dev` | 开发相关 | github, browser-bridge, dev-agent |
@@ -148,6 +167,10 @@ parent: android
 | `ops` | 运营相关 | blog-manager, feishu-notify, ops-agent |
 | `system` | 系统管理 | system-core, windows-powershell-bridge |
 | `productivity` | 效率工具 | productivity-agent, humanizer |
+
+### 5.2 metadata.category（社区分类）
+
+与 xavier 分类共用，常见值：`dev`, `android`, `ops`, `life`, `system` 等。
 
 ---
 
@@ -187,17 +210,17 @@ parent: android
 ### 内容检查
 - [ ] 触发词准确（能准确触发且不与常用词冲突）
 - [ ] 描述简洁
-- [ ] 包含执行步骤和注意事项
+- [ ] 包含注意事项和常见问题
 
 ### 社区标准检查
 - [ ] `triggers` 为复数形式（不是 `trigger`）
-- [ ] 版本放在 `metadata.version`
+- [ ] 版本放在 `metadata.version`（xavier 扩展保留 top-level `version` 也可）
 - [ ] 包含 `license` 字段
 
-### 父子结构检查
+### 父子结构检查（xavier 扩展）
 - [ ] 父 Skill 包含 `children` 字段
 - [ ] 子 Skill 包含 `parent` 字段
 
 ---
 
-*AgentHub Skill 规范 v2.0*
+*本规范 v2.0 对齐 OpenCode/ClawHub 社区格式，保留 xavier 父子 Skill 扩展*

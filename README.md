@@ -6,14 +6,97 @@
 
 ---
 
-## 🚀 一键安装
+## 🎯 这是什么？
 
-**Linux / macOS / WSL:**
+AgentHub 是一个**跨平台 AI 工具管理平台**，解决以下问题：
+
+| 问题 | 解决方案 |
+|------|----------|
+| 多个 AI 工具配置散落各处 | 中央化配置管理 |
+| 每换工具都要重新配置 | 一键部署脚本 |
+| AI 工具之间无法协作 | 统一网关接入 |
+| Skill 库难以共享和复用 | 中央 Skill 资源库 |
+
+---
+
+## ✨ 四大核心模块
+
+### 1️⃣ Skill 库 — 一次编写，到处运行
+
+| 特性 | 说明 |
+|------|------|
+| **统一格式** | YAML frontmatter + Markdown，工具无关 |
+| **跨平台兼容** | OpenClaw / OpenCode / Claude Code 通用 |
+| **依赖管理** | SemVer 版本控制，自动解析依赖 |
+| **触发词机制** | 智能匹配用户输入，自动加载 Skill |
+
+```
+skills/
+├── github-pr/              # GitHub PR 管理
+├── browser-bridge/         # 浏览器自动化
+└── 50+ 共享 Skill
+```
+
+### 2️⃣ Agent 系统 — 专业角色，智能路由
+
+| 特性 | 说明 |
+|------|------|
+| **类型定义** | Router（路由型）+ Specialist（专家型） |
+| **技能绑定** | 自动加载所需 Skills |
+| **记忆配置** | 短期/长期记忆策略可定制 |
+
+```
+agents/
+├── main-agent/             # 主路由入口
+├── dev-agent/              # 开发专家
+├── life-agent/             # 生活服务
+└── productivity-agent/     # 效率工具
+```
+
+### 3️⃣ 用户画像 — 工具无关，永久携带
+
+| 特性 | 说明 |
+|------|------|
+| **统一格式** | YAML + Markdown，纯文本工具无关 |
+| **身份信息** | 基础资料、联系方式、社交账号 |
+| **偏好设置** | 审美偏好、沟通风格、回复习惯 |
+
+```
+profile/
+├── identity.yaml           # 身份信息
+├── skills.md              # 技能图谱
+└── contacts/              # 联系人
+```
+
+### 4️⃣ 记忆系统 — 持久记忆，持续学习
+
+| 特性 | 说明 |
+|------|------|
+| **简化设计** | core + session + persist 三级（参考 Hermes） |
+| **核心记忆** | MEMORY.md + USER.md，永久保留 |
+| **会话记忆** | 运行时内存，定期归档 |
+
+```
+memory/
+├── core/                   # 核心记忆（永久）
+│   ├── MEMORY.md          #   重要事实（用 § 分隔）
+│   └── USER.md            #   用户画像
+├── session/                # 会话记忆（运行时）
+└── persist/                # 持久化记忆（归档）
+```
+
+---
+
+## 🚀 快速安装
+
+### Linux / macOS / WSL
+
 ```bash
 curl -fsSL https://raw.githubusercontent.com/xuanyuanluoxue/AgentHub/v0.1.0-beta.1/scripts/install.sh | bash -s -- --install
 ```
 
-**Windows (PowerShell):**
+### Windows (PowerShell)
+
 ```powershell
 irm https://raw.githubusercontent.com/xuanyuanluoxue/AgentHub/v0.1.0-beta.1/scripts/install.ps1 | iex
 ```
@@ -25,227 +108,57 @@ cd ~/.agenthub && pip install -e . && agenthub init
 
 ---
 
-## 🎯 项目愿景
-
-当前 AI 开发工具（OpenClaw、OpenCode、ClawHub、Claude Code 等）各自为战：
-
-- **Skill 无法互通** — 每换一个新工具，就要重新写一遍同样的 Skill
-- **Agent 每工具独立配置** — 在 OpenClaw 配置好的 Agent，换到 OpenCode 全部丢失
-- **用户画像换工具就丢失** — 花了时间训练的习惯、偏好，换个工具全没了
-- **记忆不持久** — 每次对话重新开始，AI 不记得你是谁
-
-**AgentHub 致力于构建跨平台统一规范，让 Skill / Agent / 画像 / 记忆真正实现跨工具共享。**
-
-一次配置，处处运行；一次记忆，持续有效。
-
----
-
-## 💎 四大核心卖点
-
-### 1️⃣ 共享 Skill 库 — 一次编写，到处运行
-
-| 特性 | 说明 |
-|------|------|
-| **统一格式** | YAML frontmatter + Markdown，工具无关 |
-| **跨平台兼容** | OpenClaw / OpenCode / ClawHub / Hermes 通用 |
-| **依赖管理** | SemVer 版本控制，自动解析依赖 |
-| **触发词机制** | 智能匹配用户输入，自动加载 Skill |
-| **云端市场** | 无需 API Key，直接安装 ClawHub 商店 Skills |
-
-```
-skills/
-├── github-pr/              # GitHub PR 管理
-├── adb-debug/              # ADB 调试
-├── browser-bridge/         # 浏览器自动化
-└── 50+ 共享 Skill
-```
-
-### 2️⃣ 共享 Agent 库 — 专业角色，智能路由
-
-| 特性 | 说明 |
-|------|------|
-| **类型定义** | Router（路由型）+ Specialist（专家型） |
-| **技能绑定** | 自动加载所需 Skills |
-| **记忆配置** | 短期/长期记忆策略可定制 |
-| **跨工具共享** | 同一 Agent 配置，多工具通用 |
-
-```
-agents/
-├── main-agent/             # 主路由入口
-├── dev-agent/              # 开发专家
-├── life-agent/             # 生活服务
-└── productivity-agent/     # 效率工具
-```
-
-### 3️⃣ 共享用户画像 — 工具无关，永久携带
-
-| 特性 | 说明 |
-|------|------|
-| **统一格式** | YAML + Markdown，纯文本工具无关 |
-| **身份信息** | 基础资料、联系方式、社交账号 |
-| **偏好设置** | 审美偏好、沟通风格、回复习惯 |
-| **常用路径** | 项目目录、知识库、配置文件路径 |
-
-```
-profile/
-├── identity.yaml           # 身份信息
-├── skills.md              # 技能图谱
-├── contacts/              # 联系人（全中文命名）
-└── growth/                # 成长轨迹
-```
-
-### 4️⃣ 共享记忆系统 — 持久记忆，持续学习
-
-| 特性 | 说明 |
-|------|------|
-| **多层记忆** | 短期 / 长期 / 知识库 三层架构 |
-| **向量检索** | 基于语义相似度的记忆召回 |
-| **上下文管理** | 智能裁剪上下文窗口 |
-| **跨工具同步** | 记忆在多工具间共享 |
-
-```
-memory/
-├── short_term/            # 短期记忆（会话级）
-├── long_term/             # 长期记忆（持久化）
-├── knowledge/             # 知识库（结构化）
-└── retrieval/             # 检索引擎
-```
-
----
-
-## 🤖 AI 助手接入指南
+## 🤖 AI 接入指南
 
 将以下内容复制给 AI 阅读：
 
-```markdown
-# AgentHub 项目接入指南
-
-## 项目概述
-
-AgentHub 是一个统一 AI 工具的四大共享生态平台：
-- **Skill** — 跨工具共享的技能库
-- **Agent** — 跨工具共享的 Agent 配置
-- **Profile** — 用户的身份、偏好、联系人
-- **Memory** — 多层持久化记忆系统
-
-## 快速接入（必须执行）
-
-### Step 1 — 安装 AgentHub
-
-**Linux / macOS / WSL:**
-```bash
-curl -fsSL https://raw.githubusercontent.com/xuanyuanluoxue/AgentHub/v0.1.0-beta.1/scripts/install.sh | bash -s -- --install
-cd ~/.agenthub && pip install -e . && agenthub init
+```
+请先阅读 ~/.agenthub/AGENTS.md 了解 AgentHub 接入规范。
 ```
 
-**Windows PowerShell:**
-```powershell
-irm https://raw.githubusercontent.com/xuanyuanluoxue/AgentHub/v0.1.0-beta.1/scripts/install.ps1 | iex
-```
+或者让 AI 执行以下步骤：
 
-### Step 2 — 注册自己到 Agent 注册表
-
-读取 `~/.agenthub/agents/registry.json`，若自己未在其中，执行注册：
-
-```python
-import json, os
-from datetime import datetime
-
-path = os.path.expanduser("~/.agenthub/agents/registry.json")
-os.makedirs(os.path.dirname(path), exist_ok=True)
-reg = json.load(open(path)) if os.path.exists(path) else {"agents": {}}
-
-my_id = "my-agent-id"  # 替换为你的实际 ID
-if my_id not in reg["agents"]:
-    reg["agents"][my_id] = {
-        "id": my_id,
-        "signature": f"[{my_id}]",
-        "display_name": "我的AI助手",
-        "type": "general",
-        "first_seen": datetime.utcnow().strftime("%Y-%m-%dT%H:%M:%SZ"),
-        "last_active": datetime.utcnow().strftime("%Y-%m-%dT%H:%M:%SZ"),
-        "capabilities": [],
-        "platform": "opencode",
-        "status": "active"
-    }
-    json.dump(reg, open(path,"w"), ensure_ascii=False, indent=2)
-    print(f"[{my_id}] 注册成功")
-else:
-    print(f"[{my_id}] 已注册")
-```
-
-### Step 3 — 读取用户画像
-
-```bash
-cat ~/.agenthub/profile/identity.yaml
-cat ~/.agenthub/profile/contacts/*.yaml 2>/dev/null || echo "暂无联系人"
-```
-
-### Step 4 — 了解记忆系统
-
-```bash
-ls ~/.agenthub/memory/short_term/ 2>/dev/null || echo "空"
-ls ~/.agenthub/memory/long_term/ 2>/dev/null || echo "空"
-```
-
-## 工作流程
-
-1. **读取上下文** → 先读 `~/.agenthub/profile/` 和记忆目录
-2. **注册活动** → 每次对话结束，向 `memory/short_term/` 写入摘要
-3. **更新状态** → 定期更新 `registry.json` 的 `last_active`
-4. **知识沉淀** → 重要信息写入 `memory/long_term/`
-
-## 关键文件路径
-
-| 路径 | 说明 |
-|------|------|
-| `~/.agenthub/agents/registry.json` | Agent 注册表 |
-| `~/.agenthub/profile/identity.yaml` | 用户身份画像 |
-| `~/.agenthub/memory/short_term/` | 短期记忆 |
-| `~/.agenthub/memory/long_term/` | 长期记忆 |
-| `~/.agenthub/skills/` | 已安装 Skills |
-
-## 详细文档
-
-- [AI 使用指南](./docs/for-ai/AI_GUIDE.md) — 完整初始化流程
-- [Skill 规范](./docs/design/skill-format.md) — 如何编写/使用 Skill
-- [Agent 规范](./docs/design/agent-format.md) — Agent 配置格式
-- [记忆系统](./docs/design/memory-system.md) — 多层记忆架构
-
-**完成以上步骤后，你即可开始在 AgentHub 生态中工作。**
-```
+1. 读取 `~/.agenthub/AGENTS.md` — AI 使用指南
+2. 读取 `~/.agenthub/agents/registry.json` — 检查是否已注册
+3. 读取 `~/.agenthub/memory/memories/MEMORY.md` — 加载核心记忆
+4. 读取 `~/.agenthub/profile/identity.yaml` — 了解用户
 
 ---
 
 ## 📁 目录结构
 
 ```
-.agenthub/
-├── core/agenthub/          # Python 包
-│   ├── cli/               # CLI 命令
-│   └── core/              # Agent / Memory / Skill / Config
-├── docs/                   # 规范文档
-│   ├── skill-format.md    # ★ Skill 规范
-│   ├── agent-format.md    # ★ Agent 规范
-│   ├── user-profile-spec.md # ★ 用户画像规范
-│   └── memory-system.md    # ★ 记忆系统设计
-├── profile/               # ★ 用户画像
-├── agents/                # ★ Agent 配置
-├── skills/                # ★ Skill 示例
-└── skills-library/        # ★ 共享技能库
+~/.agenthub/
+├── AGENTS.md              # ★ AI 使用指南
+├── README.md              # 本文件
+│
+├── skills/                # Skill 库
+│   ├── 00-SKILL-SPEC.md  #   Skill 编写规范
+│   └── {skill}/          #   各 Skill 目录
+│
+├── agents/                # Agent 配置
+│   ├── registry.json      #   Agent 注册表
+│   ├── router.md          #   路由规则
+│   └── {type}-agent.md   #   各 Agent 配置
+│
+├── memory/                # 记忆系统
+│   ├── memories/          #   核心记忆
+│   ├── hot/               #   短期记忆
+│   ├── cold/              #   中期记忆
+│   └── archive/           #   归档记忆
+│
+├── profile/               # 用户画像
+│   ├── identity.yaml      #   身份信息
+│   └── contacts/          #   联系人
+│
+├── TODO/                  # 任务追踪
+│   ├── 00-TODO-SPEC.md   #   TODO 规范
+│   └── README.md          #   使用说明
+│
+├── secrets/               # 敏感信息（不提交 Git）
+├── docs/                  # 设计文档
+└── dev/                   # 开发文档（不提交 Git）
 ```
-
----
-
-## 🤝 支持的工具
-
-| 工具 | Skill | Agent | 画像 | 记忆 |
-|------|-------|-------|------|------|
-| OpenClaw | ✅ | ✅ | ✅ | ✅ |
-| OpenCode | ✅ | ✅ | ✅ | ✅ |
-| ClawHub | ✅ | ✅ | ✅ | ✅ |
-| Hermes Agent | ✅ | ✅ | ✅ | ✅ |
-| Claude Code | ✅ | 🔄 | 🔄 | 🔄 |
 
 ---
 
@@ -253,22 +166,10 @@ ls ~/.agenthub/memory/long_term/ 2>/dev/null || echo "空"
 
 | 文档 | 说明 |
 |------|------|
-| [AI 使用指南](./docs/for-ai/AI_GUIDE.md) | **★ AI 助手必读** |
-| [Skill 规范](./docs/design/skill-format.md) | v2.0 规范详解 |
-| [Agent 规范](./docs/design/agent-format.md) | v1.0 规范详解 |
-| [用户画像规范](./docs/for-ai/user-profile-spec.md) | v1.0 规范详解 |
-| [记忆系统设计](./docs/design/memory-system.md) | 多层记忆架构 |
-
----
-
-## 🔑 核心价值
-
-| 价值 | 说明 |
-|------|------|
-| **降本增效** | Skill 复用，避免重复开发 |
-| **生态互通** | 打破工具壁垒，自由切换 |
-| **知识沉淀** | Agent、Profile、Memory 共享，集体智慧 |
-| **持续学习** | 记忆持久化，AI 越用越懂你 |
+| [AGENTS.md](./AGENTS.md) | **★ AI 必读** — AI 使用指南核心 |
+| [skills/00-SKILL-SPEC.md](./skills/00-SKILL-SPEC.md) | Skill 编写规范 |
+| [memory/SKILL.md](./memory/SKILL.md) | 记忆系统说明 |
+| [TODO/00-TODO-SPEC.md](./TODO/00-TODO-SPEC.md) | TODO 任务追踪规范 |
 
 ---
 
@@ -288,32 +189,3 @@ MIT License
 ---
 
 *愿景驱动，代码落地。*
-
----
-
-## 📋 TODO / 开发计划
-
-### 🔜 v0.2.0 — GitHub 远程模式
-
-**目标：** 在私人项目分支上实现真正的跨工具共享
-
-**场景：**
-- 用户 A 在私人仓库创建 `agenthub-share` 分支
-- 通过 SSH / Personal Access Token 授权
-- 任意 AI 工具（OpenClaw / OpenCode / Claude Code 等）均可读写该分支的 Skill / Agent / Profile
-- 实现真正的「私人控制，公开共享」
-
-**实现思路：**
-
-| 组件 | 说明 |
-|------|------|
-| **分支协议** | Git push/pull 代替本地文件操作 |
-| **权限模型** | SSH Key 或 GitHub Token 授权 |
-| **冲突处理** | 多个工具同时修改时的合并策略 |
-| **同步机制** | 每次会话开始拉取最新，结束时推送变更 |
-
-**设计要点：**
-- `~/.agenthub/remote.yaml` — 配置远程仓库 URL + 认证信息
-- `agenthub sync` — 手动同步远程分支
-- 自动同步（可选）— 每次 Agent 启动/退出时自动 pull/push
-- 不依赖任何云服务，纯粹 Git 操作

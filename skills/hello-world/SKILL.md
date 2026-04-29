@@ -43,5 +43,4 @@ hello-world/
 ## 进阶
 
 查看 AgentHub 文档了解如何编写自己的 Skill：
-- `docs/skill-format.md` - Skill 格式规范
-- `docs/structure.md` - 项目结构
+- `skills/00-SKILL-SPEC.md` - Skill 格式规范

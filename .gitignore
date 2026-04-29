@@ -35,7 +35,9 @@ env/
 
 # Runtime & User Data (never commit)
 runtime/
-.secrets/
+secrets/
+!.secrets/README.md
+!.secrets/*.example
 
 # macOS
 .DS_Store

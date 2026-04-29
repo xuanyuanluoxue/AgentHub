@@ -1,46 +1,56 @@
-# AgentHub 记忆系统
+# 记忆系统
 
-> 参考 Hermes + Xavier 设计的多层记忆系统
+> 版本: v2.0 | 更新: 2026-04-29
+
+---
+
+## 概述
+
+AgentHub 记忆系统采用简化架构，参考 Hermes 设计，只保留实际使用的结构。
+
+---
 
 ## 目录结构
 
 ```
 memory/
-├── memories/           # 核心记忆
-│   ├── MEMORY.md     # 重要事实（用 § 分隔）
-│   └── USER.md       # 用户画像简要
-├── hot/              # 短期记忆（60分钟 TTL）
-├── cold/             # 中期记忆（7-30天）
-│   ├── facts/       # 事实存储
-│   └── preferences/  # 偏好存储
-├── archive/          # 归档记忆（永久）
-├── knowledge/        # 知识图谱
-│   ├── nodes/       # 实体节点
-│   └── edges/       # 关系边
-├── agents/           # Agent 注册表
-└── _index/           # 索引文件
+├── core/                     # ★ 核心记忆（永久，AI 必读）
+│   ├── MEMORY.md            #   重要事实（用 § 分隔）
+│   └── USER.md              #   用户画像
+├── session/                  # 会话记忆（运行时）
+└── persist/                  # 持久化记忆（归档）
 ```
-
-## 记忆层级
-
-| 层级 | 名称 | TTL | 说明 |
-|------|------|-----|------|
-| Hot | 短期记忆 | 60分钟 | 当前会话的活跃信息 |
-| Cold | 中期记忆 | 7-30天 | 重要事实和偏好 |
-| Archive | 归档记忆 | 永久 | 经验证的重要信息 |
-
-## 核心文件
-
-| 文件 | 说明 |
-|------|------|
-| `memories/MEMORY.md` | 重要事实，使用 `§` 分隔 |
-| `memories/USER.md` | 用户画像简要 |
-
-## 隐私说明
-
-本目录为**公共模板**，不包含任何私人信息。
-如需使用，请基于模板创建你自己的配置。
 
 ---
 
-*参考: Hermes + Xavier 记忆系统设计 v2.0*
+## 层级说明
+
+| 层级 | TTL | 说明 |
+|------|-----|------|
+| core | 永久 | MEMORY.md + USER.md，AI 必读 |
+| session | 会话级 | 当前会话的活跃信息 |
+| persist | 永久 | 归档的记忆片段 |
+
+---
+
+## 快速开始
+
+### 对话开始时
+1. 读取 `memory/core/MEMORY.md`
+2. 读取 `memory/core/USER.md`
+
+### 对话中发现新信息
+- 立即追加到 `memory/core/MEMORY.md`，用 `§` 分隔
+
+### 遇到错误或踩坑
+- 追加到 `memory/core/MEMORY.md`
+
+---
+
+## 详细规范
+
+见 `memory/SKILL.md`
+
+---
+
+*AgentHub 记忆系统 v2.0 · 基于 Hermes 设计*

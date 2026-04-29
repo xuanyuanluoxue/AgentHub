@@ -2,7 +2,7 @@
   "$schema": "https://agenthub.dev/agent-card-v1",
   "description": "AgentHub Agent 身份卡模板 - 新 Agent 注册时使用",
 
-  "id": "string (必填: 唯一ID，如 dev-agent/hermes/my-bot)",
+  "id": "string (必填: 唯一ID，如 dev-agent/custom/my-bot)",
   "signature": "string (必填: 署名格式，如 [dev]，默认 [id])",
   "display_name": "string (必填: 人类可读名字，如 Dev Agent)",
 
@@ -13,7 +13,7 @@
 
   "capabilities": ["array (必填: Agent 能力列表，如 coding/memory/scheduling)"],
 
-  "platform": "string (必填: 运行平台，如 hermes/opencode/claude-code)",
+  "platform": "string (必填: 运行平台，如 opencode/claude-code/custom)",
 
   "status": "string (必填: active|inactive)",
 

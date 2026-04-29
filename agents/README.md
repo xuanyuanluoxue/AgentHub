@@ -22,7 +22,7 @@
 
 ## Agent 规范
 
-详见 `docs/agent-format.md`
+详见 `skills/00-SKILL-SPEC.md`（Skill 规范包含 Agent 相关约定）。
 
 ## 目录结构
 

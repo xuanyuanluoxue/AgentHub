@@ -74,11 +74,9 @@ stats = mem.get_stats()
 
 AgentHub 会自动索引 `~/.agenthub` 文件夹中的文件。
 
-## 与 OpenCode 共享
+## 与其他 AI 工具共享
 
-OpenCode 记忆位于 `~/.config/opencode/skills/memory/`
-
-可通过配置共享记忆数据。
+可通过符号链接或配置指向其他 AI 工具的记忆目录实现共享。
 
 ---
 
