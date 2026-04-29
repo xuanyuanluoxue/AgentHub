@@ -91,12 +91,16 @@ do_install() {
     log_info "开始安装 AgentHub..."
     echo ""
 
+    if [ ! -d "${HOME}/.agenthub" ]; then
+        log_info "正在克隆 AgentHub 仓库..."
+        git clone https://github.com/xuanyuanluoxue/AgentHub.git "${HOME}/.agenthub"
+        echo ""
+    fi
+
     case "$os_type" in
         linux|wsl)
             if command -v pip &> /dev/null; then
-                pip install -e "${HOME}/.agenthub" 2>/dev/null || {
-                    cd "${HOME}/.agenthub" && pip install -e . --user
-                }
+                cd "${HOME}/.agenthub" && pip install -e . --user
                 log_ok "Python 包安装成功"
             else
                 log_err "未找到 pip，请先安装 Python"
@@ -105,9 +109,7 @@ do_install() {
             ;;
         macos)
             if command -v pip3 &> /dev/null; then
-                pip3 install -e "${HOME}/.agenthub" 2>/dev/null || {
-                    cd "${HOME}/.agenthub" && pip3 install -e . --user
-                }
+                cd "${HOME}/.agenthub" && pip3 install -e . --user
                 log_ok "Python 包安装成功"
             else
                 log_err "未找到 pip3，请先安装 Python"
@@ -115,10 +117,13 @@ do_install() {
             fi
             ;;
         windows)
-            pip install -e "${USERPROFILE}\.agenthub" --user 2>/dev/null || {
+            if command -v pip &> /dev/null; then
                 cd "${USERPROFILE}\.agenthub" && pip install -e . --user
-            }
-            log_ok "Python 包安装成功"
+                log_ok "Python 包安装成功"
+            else
+                log_err "未找到 pip，请先安装 Python"
+                exit 1
+            fi
             ;;
     esac
 
