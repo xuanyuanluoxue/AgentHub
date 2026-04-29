@@ -98,7 +98,7 @@ curl -fsSL https://raw.githubusercontent.com/xuanyuanluoxue/AgentHub/main/misc/i
 ### Windows PowerShell
 
 ```powershell
-irm https://raw.githubusercontent.com/xuanyuanluoxue/AgentHub/main/misc/install.ps1 | iex
+irm https://raw.githubusercontent.com/xuanyuanluoxue/AgentHub/main/misc/install/windows/install.ps1 | iex
 ```
 
 安装位置：`~/.agenthub/`
