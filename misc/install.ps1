@@ -110,6 +110,9 @@ function Do-Install {
         exit 1
     }
 
+    Write-Info "排除 misc/ 安装脚本目录..."
+    Remove-Item -Recurse -Force "$INSTALL_DIR\misc" -ErrorAction SilentlyContinue
+
     Write-Host ""
     Write-Info "安装 Python 包..."
     Set-Location $INSTALL_DIR

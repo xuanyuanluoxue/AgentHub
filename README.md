@@ -110,6 +110,25 @@ cd ~/.agenthub && pip install -e . && agenthub init
 
 ---
 
+## 🔄 项目更新
+
+已安装用户可以通过以下命令更新项目：
+
+```bash
+# Linux/macOS/WSL
+agenthub update
+
+# Windows PowerShell
+.\install.ps1 -Action update
+```
+
+或者手动拉取：
+```bash
+cd ~/.agenthub && git pull && pip install -e .
+```
+
+---
+
 ## 🤖 AI 接入指南
 
 将以下内容复制给 AI 阅读：

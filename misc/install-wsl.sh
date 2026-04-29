@@ -60,6 +60,10 @@ do_install() {
         log_err "克隆失败"
         exit 1
     fi
+
+    log_info "排除 misc/ 安装脚本目录..."
+    rm -rf "$INSTALL_DIR/misc"
+
     echo ""
 
     log_info "安装 Python 包..."
