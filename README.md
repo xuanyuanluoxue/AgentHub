@@ -89,43 +89,30 @@ memory/
 
 ## 🚀 快速安装
 
-### Linux / macOS / WSL
+### 一键安装（推荐）
 
 ```bash
 curl -fsSL https://raw.githubusercontent.com/xuanyuanluoxue/AgentHub/main/misc/install.sh | bash
 ```
 
-### Windows PowerShell
+运行后显示菜单，选择操作：
 
-```powershell
-irm https://raw.githubusercontent.com/xuanyuanluoxue/AgentHub/main/misc/install/windows/install.ps1 | iex
+| 选项 | 说明 |
+|------|------|
+| `1` | 安装 AgentHub |
+| `2` | 更新 AgentHub |
+| `3` | 重新安装 |
+| `4` | 卸载 AgentHub |
+| `5` | 打开配置目录 |
+| `6` | 退出 |
+
+### 安装位置
+
+```
+~/.agenthub/   # Linux/macOS/WSL
 ```
 
-安装位置：`~/.agenthub/`
-
-安装后初始化：
-```bash
-cd ~/.agenthub && pip install -e . && agenthub init
-```
-
----
-
-## 🔄 项目更新
-
-已安装用户可以通过以下命令更新项目：
-
-```bash
-# Linux/macOS/WSL
-agenthub update
-
-# Windows PowerShell
-.\install.ps1 -Action update
-```
-
-或者手动拉取：
-```bash
-cd ~/.agenthub && git pull && pip install -e .
-```
+安装后运行 `agenthub --help` 查看帮助。
 
 ---
 
