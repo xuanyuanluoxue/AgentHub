@@ -10,66 +10,72 @@
 curl -fsSL https://raw.githubusercontent.com/xuanyuanluoxue/AgentHub/main/misc/install.sh | bash
 ```
 
-或指定操作：
-```bash
-# 安装
-curl -fsSL https://raw.githubusercontent.com/xuanyuanluoxue/AgentHub/main/misc/install.sh | bash -s -- --install
-
-# 卸载
-curl -fsSL https://raw.githubusercontent.com/xuanyuanluoxue/AgentHub/main/misc/install.sh | bash -s -- --uninstall
-```
-
 ### Windows PowerShell
 
 ```powershell
 irm https://raw.githubusercontent.com/xuanyuanluoxue/AgentHub/main/misc/install.ps1 | iex
 ```
 
-## 脚本说明
+## 功能
 
-| 脚本 | 说明 | 平台 |
-|------|------|------|
-| `install.sh` | 路由脚本，自动检测系统 | Linux/macOS/WSL/Windows |
-| `install.ps1` | 安装脚本 | Windows PowerShell |
-| `install-linux.sh` | Linux 安装脚本 | Linux |
-| `install-macos.sh` | macOS 安装脚本 | macOS |
-| `install-wsl.sh` | WSL 安装脚本 | WSL |
-| `uninstall.sh` | 卸载路由脚本 | Linux/macOS/WSL/Windows |
-| `uninstall.ps1` | 卸载脚本 | Windows PowerShell |
-| `uninstall-linux.sh` | Linux 卸载脚本 | Linux |
-| `uninstall-macos.sh` | macOS 卸载脚本 | macOS |
-| `uninstall-wsl.sh` | WSL 卸载脚本 | WSL |
+| 功能 | 说明 |
+|------|------|
+| **install** | 安装 AgentHub |
+| **uninstall** | 卸载 AgentHub |
+| **update** | 更新 AgentHub |
+| **reinstall** | 恢复出厂设置（卸载 + 重新安装） |
 
-## 安装选项
+## 使用方法
 
-- **交互模式**：直接运行脚本，显示菜单选择
-- **非交互模式**：`--install` 安装，`--uninstall` 卸载
+### 交互模式（直接运行）
+
+```bash
+# Linux/macOS/WSL
+curl -fsSL .../install.sh | bash
+
+# Windows
+irm .../install.ps1 | iex
+```
+
+### 非交互模式（指定操作）
+
+```bash
+# Linux/macOS/WSL
+curl -fsSL .../install.sh | bash -s -- install
+curl -fsSL .../install.sh | bash -s -- uninstall
+curl -fsSL .../install.sh | bash -s -- update
+curl -fsSL .../install.sh | bash -s -- reinstall
+
+# Windows PowerShell
+.\install.ps1 -Action install
+.\install.ps1 -Action uninstall
+.\install.ps1 -Action update
+.\install.ps1 -Action reinstall
+```
+
+## 安装位置
+
+```
+~/.agenthub/   # Linux/macOS/WSL
+%USERPROFILE%\.agenthub\   # Windows
+```
 
 ## 系统检测
 
-`install.sh` 会自动检测以下系统：
+`install.sh` 自动检测以下系统并路由到对应脚本：
 - Linux
 - macOS
 - Windows Subsystem for Linux (WSL)
-- Windows (Git Bash / MSYS)
+- Windows (PowerShell)
 
 ## 安装后
 
 ```bash
 agenthub --help     # 查看帮助
-agenthub init        # 初始化配置
 ```
 
 ## 卸载
 
 ```bash
-# Linux/macOS/WSL
-curl -fsSL https://raw.githubusercontent.com/xuanyuanluoxue/AgentHub/main/misc/install.sh | bash -s -- --uninstall
-
-# Windows
-irm https://raw.githubusercontent.com/xuanyuanluoxue/AgentHub/main/misc/install.ps1 | iex -Uninstall
+curl -fsSL .../install.sh | bash -s -- uninstall
 ```
-
----
-
-*最后更新：2026-04-29*

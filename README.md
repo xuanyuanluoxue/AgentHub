@@ -92,14 +92,16 @@ memory/
 ### Linux / macOS / WSL
 
 ```bash
-curl -fsSL https://raw.githubusercontent.com/xuanyuanluoxue/AgentHub/main/misc/install.sh | bash -s -- --install
+curl -fsSL https://raw.githubusercontent.com/xuanyuanluoxue/AgentHub/main/misc/install.sh | bash
 ```
 
-### Windows (PowerShell)
+### Windows PowerShell
 
 ```powershell
 irm https://raw.githubusercontent.com/xuanyuanluoxue/AgentHub/main/misc/install.ps1 | iex
 ```
+
+安装位置：`~/.agenthub/`
 
 安装后初始化：
 ```bash
