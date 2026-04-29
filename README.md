@@ -92,13 +92,13 @@ memory/
 ### Linux / macOS / WSL
 
 ```bash
-curl -fsSL https://raw.githubusercontent.com/xuanyuanluoxue/AgentHub/v0.1.0-beta.1/scripts/install.sh | bash -s -- --install
+curl -fsSL https://raw.githubusercontent.com/xuanyuanluoxue/AgentHub/main/misc/install.sh | bash -s -- --install
 ```
 
 ### Windows (PowerShell)
 
 ```powershell
-irm https://raw.githubusercontent.com/xuanyuanluoxue/AgentHub/v0.1.0-beta.1/scripts/install.ps1 | iex
+irm https://raw.githubusercontent.com/xuanyuanluoxue/AgentHub/main/misc/install.ps1 | iex
 ```
 
 安装后初始化：
@@ -120,7 +120,7 @@ cd ~/.agenthub && pip install -e . && agenthub init
 
 1. 读取 `~/.agenthub/AGENTS.md` — AI 使用指南
 2. 读取 `~/.agenthub/agents/registry.json` — 检查是否已注册
-3. 读取 `~/.agenthub/memory/memories/MEMORY.md` — 加载核心记忆
+3. 读取 `~/.agenthub/memory/core/MEMORY.md` — 加载核心记忆
 4. 读取 `~/.agenthub/profile/identity.yaml` — 了解用户
 
 ---
@@ -142,10 +142,9 @@ cd ~/.agenthub && pip install -e . && agenthub init
 │   └── {type}-agent.md   #   各 Agent 配置
 │
 ├── memory/                # 记忆系统
-│   ├── memories/          #   核心记忆
-│   ├── hot/               #   短期记忆
-│   ├── cold/              #   中期记忆
-│   └── archive/           #   归档记忆
+│   ├── core/              #   核心记忆
+│   ├── session/          #   会话记忆
+│   └── persist/          #   持久化记忆
 │
 ├── profile/               # 用户画像
 │   ├── identity.yaml      #   身份信息
