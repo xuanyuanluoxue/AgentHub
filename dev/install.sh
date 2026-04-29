@@ -111,23 +111,52 @@ show_menu() {
 }
 
 # ============================================
-# 主流程
+# 解析命令行参数
 # ============================================
-main() {
-    local action=""
-
+parse_args() {
     for arg in "$@"; do
         case $arg in
-            --install|-i) action="install" ;;
-            --uninstall|-u) action="uninstall" ;;
-            --help|-h)
-                echo "用法: $0 [--install|--uninstall]"
-                echo "  --install, -i   安装"
-                echo "  --uninstall, -u  卸载"
+            install|--install|-i) action="install" ;;
+            uninstall|--uninstall|-u) action="uninstall" ;;
+            update|--update) action="update" ;;
+            reinstall|--reinstall) action="reinstall" ;;
+            open|--open) action="open" ;;
+            help|--help|-h)
+                print_usage
                 exit 0
                 ;;
         esac
     done
+}
+
+# ============================================
+# 使用说明
+# ============================================
+print_usage() {
+    echo ""
+    echo -e "  ${CYAN}AgentHub 安装脚本${NC}"
+    echo ""
+    echo "  用法:"
+    echo "    curl -fsSL ... | bash -s -- install"
+    echo "    curl -fsSL ... | bash -s -- uninstall"
+    echo "    curl -fsSL ... | bash -s -- update"
+    echo "    curl -fsSL ... | bash -s -- reinstall"
+    echo "    curl -fsSL ... | bash -s -- open"
+    echo ""
+    echo "  或直接运行:"
+    echo "    bash install.sh          # 交互式菜单"
+    echo "    bash install.sh --install"
+    echo ""
+}
+
+# ============================================
+# 主流程
+# ============================================
+main() {
+    local action=""
+    local choice=""
+
+    parse_args "$@"
 
     print_banner
 
@@ -170,6 +199,24 @@ main() {
             fi
             ;;
 
+        reinstall)
+            echo -e "  ${YELLOW}! 重新安装 AgentHub${NC}"
+            echo ""
+            ;;
+
+        uninstall)
+            ;;
+
+        update)
+            if ! is_installed; then
+                log_error "AgentHub 未安装，无法更新"
+                exit 1
+            fi
+            log_info "正在更新 AgentHub..."
+            ;;
+    esac
+
+    case "$action" in
         uninstall)
             case "$os_type" in
                 linux|macos)
@@ -188,22 +235,38 @@ main() {
                     ;;
             esac
             ;;
-    esac
 
-    case "$os_type" in
-        linux|macos)
-            log_info "正在启动 ${os_name} 安装程序..."
-            run_local "$(dirname $0)/scripts/${os_type}/install.sh"
+        open)
+            if [ -d "${HOME}/.agenthub" ]; then
+                log_info "正在打开 AgentHub 配置目录..."
+                case "$os_type" in
+                    linux|macos) open "${HOME}/.agenthub" 2>/dev/null || xdg-open "${HOME}/.agenthub" 2>/dev/null || echo "请手动打开: ${HOME}/.agenthub" ;;
+                    windows) explorer.exe "${HOME}/.agenthub" ;;
+                esac
+                exit 0
+            else
+                log_error "AgentHub 未安装"
+                exit 1
+            fi
             ;;
-        windows)
-            log_info "正在启动 Windows 安装程序..."
-            powershell -ExecutionPolicy Bypass -File "$(dirname $0)/scripts/windows/install.ps1"
-            ;;
+
         *)
-            log_error "不支持的操作系统: $os_name"
-            echo ""
-            echo "  请手动安装: https://github.com/xuanyuanluoxue/AgentHub"
-            exit 1
+            case "$os_type" in
+                linux|macos)
+                    log_info "正在启动 ${os_name} 安装程序..."
+                    run_local "$(dirname $0)/scripts/${os_type}/install.sh"
+                    ;;
+                windows)
+                    log_info "正在启动 Windows 安装程序..."
+                    powershell -ExecutionPolicy Bypass -File "$(dirname $0)/scripts/windows/install.ps1"
+                    ;;
+                *)
+                    log_error "不支持的操作系统: $os_name"
+                    echo ""
+                    echo "  请手动安装: https://github.com/xuanyuanluoxue/AgentHub"
+                    exit 1
+                    ;;
+            esac
             ;;
     esac
 }
