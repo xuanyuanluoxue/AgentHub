@@ -6,16 +6,16 @@
 
 ```
 misc/
-├── install.sh              # 路由脚本（自动检测系统）
-└── install/
-    ├── linux/              # Linux 安装脚本
-    │   └── install.sh
-    ├── macos/              # macOS 安装脚本
-    │   └── install.sh
-    ├── wsl/                # WSL 安装脚本
-    │   └── install.sh
-    └── windows/            # Windows 安装脚本
-        └── install.ps1
+├── install.sh              # 安装路由脚本
+├── uninstall.sh            # 卸载路由脚本
+├── update.sh               # 更新路由脚本
+├── reinstall.sh            # 重装路由脚本（恢复出厂设置）
+├── open.sh                 # 打开项目目录
+└── install/                # 各系统安装脚本
+    ├── linux/install.sh
+    ├── macos/install.sh
+    ├── wsl/install.sh
+    └── windows/install.ps1
 ```
 
 ## 一键安装
@@ -34,28 +34,30 @@ irm https://raw.githubusercontent.com/xuanyuanluoxue/AgentHub/main/misc/install/
 
 ## 功能
 
-| 操作 | 说明 |
+| 命令 | 说明 |
 |------|------|
 | `install` | 安装 |
 | `uninstall` | 卸载 |
 | `update` | 更新 |
 | `reinstall` | 恢复出厂设置 |
+| `open` | 打开项目目录 |
 
 ## 使用方法
 
-### 交互模式（直接运行）
+### 交互模式
 
 ```bash
 curl -fsSL .../install.sh | bash
 ```
 
-### 非交互模式（指定操作）
+### 非交互模式
 
 ```bash
 curl -fsSL .../install.sh | bash -s -- install
 curl -fsSL .../install.sh | bash -s -- uninstall
 curl -fsSL .../install.sh | bash -s -- update
 curl -fsSL .../install.sh | bash -s -- reinstall
+curl -fsSL .../install.sh | bash -s -- open
 ```
 
 ## 安装位置
@@ -69,17 +71,4 @@ curl -fsSL .../install.sh | bash -s -- reinstall
 
 ```bash
 agenthub --help     # 查看帮助
-```
-
-## 项目更新
-
-已安装用户可以通过以下命令更新：
-
-```bash
-agenthub update
-```
-
-或手动：
-```bash
-cd ~/.agenthub && git pull && pip install -e .
 ```

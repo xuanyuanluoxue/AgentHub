@@ -1,11 +1,11 @@
 #!/bin/bash
-# AgentHub 安装路由脚本
+# AgentHub 管理脚本
 # 用法:
 #   curl -fsSL ... | bash              # 交互模式
-#   curl -fsSL ... | bash -s -- install   # 非交互模式
+#   curl -fsSL ... | bash -s -- <cmd>   # 非交互模式
 set -e
 
-REPO_RAW="https://raw.githubusercontent.com/xuanyuanluoxue/AgentHub/main/misc/install"
+REPO_RAW="https://raw.githubusercontent.com/xuanyuanluoxue/AgentHub/main/misc"
 
 RED='\033[0;31m'
 GREEN='\033[0;32m'
@@ -21,15 +21,14 @@ log_err() { echo -e "  ${RED}[X]${NC} $1"; }
 
 show_banner() {
     echo ""
-    echo -e "  ${GREEN}    _                    _   _   _       _     ${NC}"
-    echo -e "  ${GREEN}   / \\   __ _  ___ _ __ | |_| | | |_   _| |__  ${NC}"
-    echo -e "  ${GREEN}  / _ \\ / _\` |/ _ \\ '_ \\| __| |_| | | | | '_ \\ ${NC}"
-    echo -e "  ${GREEN} / ___ \\ (_| |  __/ | | | |_|  _  | |_| | |_) |${NC}"
-    echo -e "  ${GREEN}/_/   \\_\\__, |\\___|_| |_|\__|_| |_|\\__,_|_.__/ ${NC}"
-    echo -e "  ${GREEN}        |___/                               ${NC}"
+    echo -e "  ${CYAN}    _                    _   _   _       _     ${NC}"
+    echo -e "  ${CYAN}   / \   __ _  ___ _ __ | |_| | | |_   _| |__  ${NC}"
+    echo -e "  ${CYAN}  / _ \ / _\` |/ _ \ '_ \| __| |_| | | | | '_ \ ${NC}"
+    echo -e "  ${CYAN} / ___ \ (_| |  __/ | | | |_|  _  | |_| | |_) |${NC}"
+    echo -e "  ${CYAN}/_/   \_\__, |\___|_| |_|\__|_| |_|\__,_|_.__/ ${NC}"
+    echo -e "  ${CYAN}        |___/                               ${NC}"
     echo ""
-    echo -e "  ${CYAN}统一 AI 工具四大共享生态${NC}"
-    echo -e "  ${CYAN}Skill · Agent · 画像 · 记忆${NC}"
+    echo -e "  ${CYAN}AgentHub 管理工具${NC}"
     echo ""
 }
 
@@ -54,75 +53,83 @@ detect_os() {
     esac
 }
 
-# 下载并执行对应系统的脚本
 download_and_run() {
-    local os="$1"
-    shift
-    curl -fsSL "${REPO_RAW}/${os}/install.sh" | bash -s -- "$@"
+    local cmd="$1"
+    local os="$2"
+    curl -fsSL "${REPO_RAW}/${cmd}/${os}/install.sh" | bash
+}
+
+show_menu() {
+    show_banner
+
+    echo "  请选择操作:"
+    echo ""
+    echo -e "    ${GREEN}[1]${NC} 安装 AgentHub"
+    echo -e "    ${YELLOW}[2]${NC} 卸载 AgentHub"
+    echo -e "    ${CYAN}[3]${NC} 更新 AgentHub"
+    echo -e "    ${RED}[4]${NC} 恢复出厂设置"
+    echo -e "    ${BLUE}[5]${NC} 打开项目目录"
+    echo -e "    ${DIM}[6]${NC} 退出"
+    echo ""
+    echo -n "  请输入选项 [1-6]: "
+    read choice
+    echo ""
+
+    case "$choice" in
+        1) cmd="install" ;;
+        2) cmd="uninstall" ;;
+        3) cmd="update" ;;
+        4) cmd="reinstall" ;;
+        5) cmd="open" ;;
+        *) log_info "退出"; exit 0 ;;
+    esac
+
+    echo "$cmd"
 }
 
 main() {
-    local action=""
+    local cmd=""
+    local os_type=$(detect_os)
 
     for arg in "$@"; do
         case $arg in
-            install|i) action="install" ;;
-            uninstall|u) action="uninstall" ;;
-            update) action="update" ;;
-            reinstall|r) action="reinstall" ;;
+            install|i) cmd="install" ;;
+            uninstall|u) cmd="uninstall" ;;
+            update) cmd="update" ;;
+            reinstall|r) cmd="reinstall" ;;
+            open|o) cmd="open" ;;
             --help|-h)
-                echo "用法: $0 [install|uninstall|update|reinstall]"
+                echo "用法: $0 [install|uninstall|update|reinstall|open]"
                 echo "  install, i     安装"
                 echo "  uninstall, u   卸载"
                 echo "  update         更新"
                 echo "  reinstall, r   恢复出厂设置"
+                echo "  open, o       打开项目目录"
                 exit 0
                 ;;
         esac
     done
 
-    local os_type=$(detect_os)
-
-    if [ -n "$action" ]; then
-        download_and_run "$os_type" "$@"
-        return
-    fi
-
     # 交互模式
-    if [ -t 0 ]; then
-        show_banner
-        log_info "检测到系统: ${CYAN}${os_type}${NC}"
-        echo ""
-        echo "  请选择操作:"
-        echo ""
-        echo -e "    ${GREEN}[1]${NC} 安装 AgentHub"
-        echo -e "    ${YELLOW}[2]${NC} 卸载 AgentHub"
-        echo -e "    ${CYAN}[3]${NC} 更新 AgentHub"
-        echo -e "    ${RED}[4]${NC} 恢复出厂设置"
-        echo -e "    ${DIM}[5]${NC} 退出"
-        echo ""
-        echo -n "  请输入选项 [1-5]: "
-        read choice
-        echo ""
-
-        case "$choice" in
-            1) action="install" ;;
-            2) action="uninstall" ;;
-            3) action="update" ;;
-            4) action="reinstall" ;;
-            *) log_info "退出"; exit 0 ;;
-        esac
-
-        download_and_run "$os_type" "$action"
-    else
-        log_err "管道模式需要指定操作"
-        echo ""
-        echo "  用法: curl -fsSL ... | bash -s -- install"
-        echo "        curl -fsSL ... | bash -s -- uninstall"
-        echo "        curl -fsSL ... | bash -s -- update"
-        echo "        curl -fsSL ... | bash -s -- reinstall"
-        exit 1
+    if [ -z "$cmd" ]; then
+        if [ -t 0 ]; then
+            cmd=$(show_menu)
+        else
+            log_err "管道模式需要指定命令"
+            echo ""
+            echo "  用法: curl -fsSL ... | bash -s -- install"
+            echo "        curl -fsSL ... | bash -s -- uninstall"
+            echo "        curl -fsSL ... | bash -s -- update"
+            echo "        curl -fsSL ... | bash -s -- reinstall"
+            echo "        curl -fsSL ... | bash -s -- open"
+            exit 1
+        fi
     fi
+
+    log_info "检测到系统: ${CYAN}${os_type}${NC}"
+    echo ""
+
+    download_and_run "$cmd" "$os_type"
 }
 
 main "$@"
