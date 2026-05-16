@@ -8,27 +8,89 @@
 
 ## 1. 项目概述
 
-AgentHub 是一个**跨平台 AI 工具管理平台**，核心目标是：
+AgentHub 是一个**跨平台 AI 工具共享架构**，核心目标是：
 
-- **统一 Skill 格式** — 一次编写，跨工具复用
-- **统一 Agent 配置** — 一次配置，处处运行
-- **统一记忆系统** — 跨会话持久化
-- **统一用户画像** — 工具切换不丢失
+- **统一 Skill 格式** — 一次编写，跨 AI 工具复用
+- **统一 Agent 配置** — 一次配置，跨 AI 工具运行
+- **统一记忆系统** — 跨 AI 工具持久化
+- **统一用户画像** — 切换工具不丢失
 
 ```
-用户 ──▶ 任意 AI 工具 ──▶ AgentHub
-                              │
-              ┌───────────────┼───────────────┐
-              ▼               ▼               ▼
-          Skills/         Memory/          Profile/
-          Agents          TODO
+                  ┌──────────────────┐
+                  │  共享数据架构    │
+                  │  ~/.agenthub/    │
+                  └──────────────────┘
+                    │    │    │    │
+        ┌───────────┼────┼────┼────┼───────────┐
+        ▼           ▼    ▼    ▼    ▼           ▼
+    ┌─────────┐ ┌─────────┐ ┌─────────┐ ┌─────────┐
+    │ AI工具1  │ │ AI工具2  │ │ AI工具3  │ │ AI工具4  │
+    └─────────┘ └─────────┘ └─────────┘ └─────────┘
+        │           │           │           │
+        ▼           ▼           ▼           ▼
+    Skills/     Skills/     Skills/     Skills/
+    Memory      Memory      Memory      Memory
+    Profile     Profile     Profile     Profile
 ```
 
 **核心价值**: 一次配置，处处运行；一次记忆，持续有效。
 
 ---
 
-## 2. 目录结构
+## 2. 共享数据架构（AgentHub）
+
+> AgentHub 是一个跨 AI 工具的共享数据架构，为接入的 AI 工具提供共享资源
+>
+> **核心定位**：共享技能库 · 共享 Agent 库 · 共享用户画像 · 共享记忆系统
+>
+> **共享含义**：所有接入的 AI 工具都可以访问和使用 AgentHub 提供的共享资源
+
+### 共享数据根目录
+- `~/.agenthub/` — AgentHub 共享资源库
+
+### 共享资源类型
+| 资源 | 路径 | 说明 |
+|------|------|------|
+| 共享 Skill 库 | `~/.agenthub/skills/` | 所有 AI 工具可复用 |
+| 共享 Agent 库 | `~/.agenthub/agents/` | 可复用的 Agent 模板 |
+| 共享用户画像 | `~/.agenthub/profile/` | 跨工具统一用户画像 |
+| 共享记忆系统 | `~/.agenthub/memory/` | 跨会话持久化记忆 |
+| AI 工具注册表 | `memory/core/ai-registry.json` | 已接入的 AI 工具清单 |
+
+### AI 工具注册表
+- 路径：`memory/core/ai-registry.json`
+- 说明：各 AI 工具在此注册，接入 AgentHub 共享架构
+
+### 注册表结构
+```json
+{
+  "tools": {
+    "tool-name": {
+      "name": "显示名称",
+      "config_path": "配置目录路径",
+      "skills_path": "技能库路径（可选）",
+      "capabilities": {
+        "subagents": ["子Agent列表"],
+        "memory_system": true,
+        "skills": true,
+        "gateway": true,
+        "channels": ["支持的通道"]
+      },
+      "last_updated": "最后更新时间"
+    }
+  }
+}
+```
+
+### 工作流程
+当收到"更新共享数据"指令时：
+1. 遍历所有数据源文件夹
+2. 对比 `~/.agenthub/` 中已存在的内容
+3. 将没有的内容复制到对应共享目录
+
+---
+
+## 3. 目录结构
 
 ```
 ~/.agenthub/
@@ -48,9 +110,10 @@ AgentHub 是一个**跨平台 AI 工具管理平台**，核心目标是：
 │   └── {type}-agent.md    # 各专业 Agent 配置
 │
 ├── memory/                # 🧠 记忆系统
-│   ├── memories/          #   核心记忆文件
+│   ├── core/               #   核心记忆
 │   │   ├── MEMORY.md      #   重要事实（用 § 分隔）
-│   │   └── USER.md        #   用户画像简要
+│   │   ├── USER.md        #   用户画像简要
+│   │   └── ai-registry.json  # AI工具注册表
 │   ├── hot/               #   短期记忆（会话级）
 │   ├── cold/              #   中期记忆（7-30天）
 │   ├── archive/           #   归档记忆（永久）
@@ -65,20 +128,19 @@ AgentHub 是一个**跨平台 AI 工具管理平台**，核心目标是：
 ├── TODO/                  # 📋 任务追踪
 │   ├── 00-TODO-SPEC.md    #   TODO 规范
 │   ├── README.md          #   使用说明
-│   ├── [归档]/            #   已完成任务
-│   ├── [待办]*.md        #   待开始任务
-│   └── [进行中]*.md       #   进行中任务
+│   ├── 待办/              #   待开始任务
+│   ├── 进行中/            #   进行中任务
+│   └── 归档/              #   已完成任务
 │
 ├── secrets/               # 🔐 敏感信息（不提交 Git）
-├── docs/                  # 📚 设计文档（归档）
-└── dev/                   # 🔧 开发文档（不提交 Git）
+└── docs/                  # 📚 设计文档（归档）
 ```
 
 ---
 
-## 3. 核心模块详解
+## 4. 核心模块详解
 
-### 3.1 Skills（技能）
+### 4.1 Skills（技能）
 
 **用途**: 让 AI 掌握特定任务的执行方法，跨工具复用。
 
@@ -112,7 +174,7 @@ triggers: ["触发词1", "触发词2"]
 
 ---
 
-### 3.2 Agents（路由）
+### 4.2 Agents（路由）
 
 **用途**: 根据用户意图路由到最合适的专业 Agent 或 Skill。
 
@@ -145,20 +207,15 @@ triggers: ["触发词1", "触发词2"]
 
 ---
 
-### 3.3 Memory（记忆）
+### 4.3 Memory（记忆）
 
 **用途**: 持久化 AI 与用户的交互历史，实现跨会话记忆。
 
 **文件架构**:
 ```
-memory/memories/              ← 核心记忆（永久，AI 必读）
+memory/core/              ← 核心记忆（永久，AI 必读）
 ├── MEMORY.md            #   重要事实，分隔符 §
 └── USER.md              #   用户画像简要
-
-memory/
-├── hot/                  ← 短期记忆（会话级）
-├── cold/                 ← 中期记忆（7-30天）
-└── archive/              ← 归档记忆（永久）
 ```
 
 **MEMORY.md 格式**:
@@ -185,11 +242,10 @@ memory/
 
 | 时机 | 操作 |
 |------|------|
-| **对话开始** | 读取 `memory/memories/MEMORY.md` + `USER.md` |
-| **发现新信息** | 立即追加到 `memory/memories/MEMORY.md`，用 `§` 分隔 |
-| **用户纠正偏好** | 写入 `memory/cold/preferences/` |
-| **完成任务/重要决定** | 写入 `memory/cold/` 或 `memory/archive/` |
-| **遇到错误/踩坑** | 追加到 `memory/memories/MEMORY.md` |
+| **对话开始** | 读取 `memory/core/MEMORY.md` + `USER.md` |
+| **发现新信息** | 立即追加到 `memory/core/MEMORY.md`，用 `§` 分隔 |
+| **用户纠正偏好** | 写入 `memory/core/USER.md` |
+| **遇到错误/踩坑** | 追加到 `memory/core/MEMORY.md` |
 
 **重要规则**:
 - ❌ 不要覆盖 MEMORY.md 中的已有内容，只做追加
@@ -199,7 +255,7 @@ memory/
 
 ---
 
-### 3.4 Profile（用户画像）
+### 4.4 Profile（用户画像）
 
 **用途**: 存储用户的身份、偏好、联系人，让 AI 快速了解用户。
 
@@ -207,10 +263,7 @@ memory/
 ```
 profile/
 ├── identity.yaml    # 基础信息（姓名/学校/职业等）
-├── skills.md        # 技能清单
-└── contacts/        # 联系人
-    ├── 张三.yaml
-    └── 李四.yaml
+└── skills.md        # 技能清单（可选）
 ```
 
 **identity.yaml 格式**:
@@ -225,27 +278,25 @@ preferences:
 
 **AI 使用规范**:
 - 对话开始时读取 `profile/identity.yaml` 了解用户基础信息
-- 读取 `profile/contacts/` 了解相关联系人
 - 用户纠正偏好时，更新对应文件
 
 ---
 
-### 3.5 TODO（任务追踪）
+### 4.5 TODO（任务追踪）
 
 **用途**: 追踪复杂任务的多步骤进度，确保不遗漏。
 
 **文件命名**:
 ```
-[{状态}]{序号}-{标题}.md
-例：[待办]001-科目一学习.md
-    [进行中]002-博客优化.md
+{序号}-{标题}.md
 ```
+文件存放在对应状态目录中：`待办/` `进行中/` `归档/`
 
 **状态流转**:
 ```
-[待办] ──开始──▶ [进行中] ──完成──▶ [归档]
+待办/ ──开始──▶ 进行中/ ──完成──▶ 归档/
   │                    │
-  └──取消───────────────┴──────▶ [归档]
+  └──取消───────────────┴──────▶ 归档/
 ```
 
 **文件格式**:
@@ -261,7 +312,7 @@ updated_at: "2026-04-28T15:30:00Z"
 due: "2026-08-01"
 ---
 
-# [进行中]001 - 科目一学习计划
+# 001 - 科目一学习计划
 
 ## 任务描述
 暑假前通过科目一考试，每天刷题100道。
@@ -282,7 +333,7 @@ due: "2026-08-01"
 
 ---
 
-## 4. 模块联动
+## 5. 模块联动
 
 ### 4.1 典型工作流
 
@@ -290,13 +341,13 @@ due: "2026-08-01"
 用户: "帮我开发一个博客网站"
 
 1. [路由] 判断为开发任务，加载 dev-agent 或 web-development Skill
-2. [记忆] 检查 memory/memories/MEMORY.md 是否有关于博客的过往经验
+2. [记忆] 检查 memory/core/MEMORY.md 是否有关于博客的过往经验
 3. [画像] 读取 profile/identity.yaml 了解用户技术栈
 4. [技能] 加载 web-development SKILL
-5. [TODO] 创建 [待办]001-博客开发.md 追踪进度
+5. [TODO] 创建 `待办/001-博客开发.md` 追踪进度
 6. [执行] 按 SKILL 步骤执行
-7. [记忆] 完成/踩坑 → 追加到 memories/MEMORY.md
-8. [归档] 任务完成 → TODO 移至 归档/
+7. [记忆] 完成/踩坑 → 追加到 `memory/core/MEMORY.md`
+8. [归档] 任务完成 → TODO 移至 `归档/`
 ```
 
 ### 4.2 跨模块依赖
@@ -306,14 +357,14 @@ due: "2026-08-01"
     │
     ├── Skill ──▶ 加载执行方法
     ├── Agent ──▶ 路由到专业处理
-    ├── Memory ─▶ 读取历史记忆（memories/MEMORY.md）
+    ├── Memory ─▶ 读取历史记忆（memory/core/MEMORY.md）
     ├── Profile ─▶ 读取用户画像（profile/）
     └── TODO ──▶ 记录/追踪进度
 ```
 
 ---
 
-## 5. AI 初始化流程
+## 6. AI 初始化流程
 
 接入 AgentHub 时，AI 应按以下顺序初始化：
 
@@ -322,17 +373,17 @@ Step 1: 读取本文件 (AGENTS.md)
     │
     ├── 读取 README.md 了解项目愿景
     ├── 读取 agents/registry.json 检查是否已注册
+    ├── 读取 memory/core/ai-registry.json 了解已注册的 AI 工具
     └── 若未注册 → 执行注册流程
     │
 Step 2: 加载核心记忆
     │
-    ├── 读取 memory/memories/MEMORY.md
-    └── 读取 memory/memories/USER.md
+    ├── 读取 memory/core/MEMORY.md
+    └── 读取 memory/core/USER.md
     │
 Step 3: 加载用户画像
     │
-    ├── 读取 profile/identity.yaml
-    └── 读取 profile/contacts/ 了解联系人
+    └── 读取 profile/identity.yaml
     │
 Step 4: 检查待办
     │
@@ -340,36 +391,80 @@ Step 4: 检查待办
     │
 Step 5: 确认 Skill 库
     │
-    └── 读取 skills/registry.json 了解可用技能
+    └── 读取 skills/00-SKILL-SPEC.md 了解可用技能
 ```
 
 ---
 
-## 6. 命名与格式规范
+## 7. 默认工作文件夹
+
+**推荐设置**：将 AI 的默认工作文件夹设置为 `~/.agenthub/`
+
+### 6.1 为什么推荐
+
+| 优势 | 说明 |
+|------|------|
+| 配置集中 | Skill、Agent、记忆、画像都在同一目录 |
+| 启动即读取 | AI 启动时自动加载配置，无需手动指定 |
+| 跨工具共享 | 通过符号链接，多个 AI 工具共享同一配置 |
+
+### 6.2 设置方法
+
+**OpenCode**：在配置中设置默认工作目录
+```json
+{
+  "working_directory": "~/.agenthub"
+}
+```
+
+**Cursor**：打开 `~/.agenthub` 作为工作区
+
+**其他工具**：将启动目录设置为 `~/.agenthub/`
+
+### 6.3 工作模式
+
+```
+默认启动 → ~/.agenthub（读取配置、记忆、画像）
+    │
+    ├── 用户说"切换到 ~/projects/my-app"
+    │   └── AI 切换到项目目录，开始开发
+    │
+    └── 用户说"回到 agenthub"
+        └── AI 切换回 ~/.agenthub
+```
+
+**说明**：
+- 配置/记忆始终在 `~/.agenthub`，不受工作目录影响
+- 用户可随时切换到其他项目目录进行开发
+- 切换后，AI 仍可读取 `~/.agenthub` 下的配置
+
+---
+
+## 8. 命名与格式规范
 
 | 模块 | 格式要求 |
 |------|----------|
 | Skill 名 | 英文 kebab-case，如 `web-development` |
 | Agent ID | 英文 kebab-case，如 `dev-agent` |
 | 目录名 | 英文 kebab-case 或中文均可 |
-| TODO 状态 | `[待办]` / `[进行中]` / `[归档]` |
+| TODO 状态 | 目录名 `待办` `进行中` `归档` |
 | 记忆分隔 | `§` 独占一行 |
 | 时间格式 | ISO 8601，如 `2026-04-29T10:00:00Z` |
 | AI 署名 | `[agent-id]` 格式 |
 
 ---
 
-## 7. 禁止事项
+## 9. 禁止事项
 
 - ❌ 不要在 `secrets/` 外的任何地方存储密钥
 - ❌ 不要覆盖 `memories/MEMORY.md` 中的已有内容，只做追加
 - ❌ 不要删除 `archive/` 中的归档记忆
-- ❌ 不要在 `dev/` 外存放开发文档（不参与 git）
 - ❌ 不要出现任何私人路径或信息（保持开源通用）
+- ❌ 不要使用 `TODO/` 文件夹追踪任务（这是用户专用的模板目录）
 
 ---
 
-## 8. 快速索引
+## 10. 快速索引
 
 | 需要 | 路径 |
 |------|------|
@@ -378,10 +473,10 @@ Step 5: 确认 Skill 库
 | 路由规则 | `./agents/router.md` |
 | Skill 规范 | `./skills/00-SKILL-SPEC.md` |
 | TODO 规范 | `./TODO/00-TODO-SPEC.md` |
-| 记忆系统 | `./memory/SKILL.md` |
+| 记忆系统 | `./memory/core/MEMORY.md` |
 | 设计文档 | `./docs/` |
 
 ---
 
 *AgentHub · 愿景驱动，代码落地。*
-*AI 接入规范 v1.0 · 2026-04-29*
+*AI 接入规范 v2.0 · 2026-05-15*

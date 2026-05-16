@@ -163,8 +163,7 @@ curl -fsSL https://raw.githubusercontent.com/xuanyuanluoxue/AgentHub/main/misc/i
 │   └── README.md          #   使用说明
 │
 ├── secrets/               # 敏感信息（不提交 Git）
-├── docs/                  # 设计文档
-└── dev/                   # 开发文档（不提交 Git）
+└── docs/                  # 设计文档
 ```
 
 ---

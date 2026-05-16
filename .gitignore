@@ -47,6 +47,7 @@ dev/
 
 # 开发文档（不提交 Git）
 开发计划书.md
+README-dev.md
 
 # SQLite
 *.db

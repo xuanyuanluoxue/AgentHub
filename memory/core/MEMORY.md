@@ -14,12 +14,41 @@
 ## 记忆条目示例（占位符）
 
 ```
-- 技能同步路径：~/.agenthub/skills/ 和 ~/.config/opencode/skills/
-§
-- 用户偏好：喜欢结构清晰的文件夹分类
-§
 - 项目结构：使用多Agent分工架构
 §
+- 项目架构：采用符号链接方案，各工具目录链接到 ~/.agenthub/
+§
+- 项目规范：skill 格式基于 YAML frontmatter + Markdown，支持跨工具共享
+§
+- 项目脚本：scripts/setup-symlinks.ps1 用于创建符号链接
+§
+- 共享范围：skills、agents、profile、memory、config
+§
+
+## AI 工具注册表
+- 路径：`memory/core/ai-registry.json`
+- 说明：各 AI 工具在此注册自己的配置位置和功能清单，AgentHub 通过此注册表自动发现并接入新工具
+
+## 注册表结构
+```json
+{
+  "tools": {
+    "tool-name": {
+      "name": "显示名称",
+      "config_path": "配置目录路径",
+      "skills_path": "技能库路径（可选）",
+      "capabilities": {
+        "subagents": ["子Agent列表"],
+        "memory_system": true,
+        "skills": true,
+        "gateway": true,
+        "channels": ["支持的通道"]
+      },
+      "last_updated": "最后更新时间"
+    }
+  }
+}
+```
 ```
 
 ## 标签说明

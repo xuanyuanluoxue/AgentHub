@@ -1,22 +1,22 @@
 {
   "version": "1.0.0",
   "schema": "agent-card-v1",
-  "last_updated": "2026-04-27T17:30:00Z",
-  "description": "AgentHub Agent Registry - AI Agent 成员列表，包含身份与署名",
+  "last_updated": "[更新时间]",
+  "description": "AgentHub Agent Registry - AI Agent 成员列表",
   "agents": {
     "main-agent": {
       "id": "main-agent",
       "signature": "[main]",
       "display_name": "Main Agent",
       "type": "router",
-      "first_seen": "2026-04-20T00:00:00Z",
-      "last_active": "2026-04-27T00:00:00Z",
+      "first_seen": "[首次使用时间]",
+      "last_active": "[最后活跃时间]",
       "capabilities": [
         "routing",
         "coordination",
         "delegation"
       ],
-      "platform": "opencode",
+      "platform": "[平台名称]",
       "status": "active",
       "note": "主路由 Agent，负责分发任务到专业 Agent"
     },
@@ -25,17 +25,15 @@
       "signature": "[dev]",
       "display_name": "Dev Agent",
       "type": "specialist",
-      "first_seen": "2026-04-20T00:00:00Z",
-      "last_active": "2026-04-27T00:00:00Z",
+      "first_seen": "[首次使用时间]",
+      "last_active": "[最后活跃时间]",
       "capabilities": [
         "coding",
         "fullstack",
-        "android",
-        "weapp",
         "web",
         "api"
       ],
-      "platform": "opencode",
+      "platform": "[平台名称]",
       "status": "active",
       "note": "开发专家，处理所有开发任务"
     },
@@ -44,16 +42,15 @@
       "signature": "[life]",
       "display_name": "Life Agent",
       "type": "specialist",
-      "first_seen": "2026-04-20T00:00:00Z",
-      "last_active": "2026-04-27T00:00:00Z",
+      "first_seen": "[首次使用时间]",
+      "last_active": "[最后活跃时间]",
       "capabilities": [
         "schedule",
         "weather",
         "homework",
-        "emotion",
-        "resume"
+        "emotion"
       ],
-      "platform": "opencode",
+      "platform": "[平台名称]",
       "status": "active",
       "note": "生活服务，处理日程、课程、情感等"
     },
@@ -62,8 +59,8 @@
       "signature": "[ops]",
       "display_name": "Ops Agent",
       "type": "specialist",
-      "first_seen": "2026-04-20T00:00:00Z",
-      "last_active": "2026-04-27T00:00:00Z",
+      "first_seen": "[首次使用时间]",
+      "last_active": "[最后活跃时间]",
       "capabilities": [
         "blog",
         "feishu",
@@ -72,7 +69,7 @@
         "docs",
         "ppt"
       ],
-      "platform": "opencode",
+      "platform": "[平台名称]",
       "status": "active",
       "note": "运营专家，处理内容发布和社交媒体"
     },
@@ -81,33 +78,16 @@
       "signature": "[productivity]",
       "display_name": "Productivity Agent",
       "type": "specialist",
-      "first_seen": "2026-04-20T00:00:00Z",
-      "last_active": "2026-04-27T00:00:00Z",
+      "first_seen": "[首次使用时间]",
+      "last_active": "[最后活跃时间]",
       "capabilities": [
         "automation",
         "browser",
-        "scripts",
-        "humanizer"
+        "scripts"
       ],
-      "platform": "opencode",
+      "platform": "[平台名称]",
       "status": "active",
       "note": "效率专家，处理自动化和效率提升"
-    },
-    "doubao": {
-      "id": "doubao",
-      "signature": "[doubao]",
-      "display_name": "豆包",
-      "type": "general",
-      "platform": "doubao",
-      "capabilities": [
-        "video_analysis",
-        "agent_creation",
-        "knowledge_extraction"
-      ],
-      "status": "active",
-      "first_seen": "2026-04-27T19:45:00Z",
-      "last_active": "2026-04-27T19:45:00Z",
-      "notes": "豆包视频分析 + Agent 制作专家"
     }
   }
 }

@@ -51,9 +51,9 @@
 
 | 资源 | 路径 |
 |------|------|
-| 中继服务器 | `D:/code/windows/edge/relay-server/` |
-| Edge 扩展 | `D:/code/windows/edge/extension/` |
-| Token 文件 | `~/.ubb/token` |
+| 中继服务器 | `[中继服务器目录]` |
+| Edge 扩展 | `[Edge扩展目录]` |
+| Token 文件 | `[Token文件路径]` |
 
 ---
 

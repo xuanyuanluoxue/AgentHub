@@ -36,17 +36,17 @@
 
 | 项目 | 值 |
 |------|-----|
-| IP | your-server-ip |
-| SSH密钥 | `~/.ssh/id_rsa_blog` |
-| 网站目录 | `/www/wwwroot/` |
-| OpenList | `http://your-server:5245/` |
-| WebDAV | `http://your-server:8080/` |
+| IP | [服务器IP] |
+| SSH密钥 | `[SSH密钥路径]` |
+| 网站目录 | `[网站目录]` |
+| OpenList | `[OpenList地址]` |
+| WebDAV | `[WebDAV地址]` |
 
 ## 邮件配置
 
-- 使用 QQ 邮箱 SMTP
+- 使用 [邮箱服务] SMTP
 - 发件人必须用裸地址
-- 格式: `msg['From'] = "your-email@qq.com"`
+- 格式: `msg['From'] = "[邮箱地址]"`
 
 ## 微信自动化
 

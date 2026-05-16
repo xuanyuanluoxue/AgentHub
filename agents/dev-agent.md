@@ -61,10 +61,10 @@ project/
 
 | 内容 | 路径 |
 |------|------|
-| 项目代码 | `D:/code/` |
-| Android项目 | `D:/code/Android/` |
-| Web项目 | `D:/code/web/` |
-| 小程序项目 | `D:/code/weapp/` |
+| 项目代码 | `[项目代码目录]` |
+| Android项目 | `[Android项目目录]` |
+| Web项目 | `[Web项目目录]` |
+| 小程序项目 | `[小程序项目目录]` |
 
 ## 约束规则
 
